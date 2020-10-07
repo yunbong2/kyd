@@ -119,7 +119,7 @@ class CarController():
 
     if (( CS.out.leftBlinker and not CS.out.rightBlinker) or ( CS.out.rightBlinker and not CS.out.leftBlinker)) or self.lanechange_manual_timer and CS.out.vEgo >= (60 * CV.KPH_TO_MS):
       self.new_steer_by_speed_timer += 1
-      if self.new_steer_by_speed_timer < 100:
+      if self.new_steer_by_speed_timer < 200:
         self.new_steer_by_speed = interp(CS.out.vEgo, self.torq_vego, self.new_torq_vego)
         new_steer = actuators.steer * SteerLimitParams.STEER_MAX * self.new_steer_by_speed
       else:
@@ -184,7 +184,7 @@ class CarController():
     can_sends.append(create_mdps12(self.packer, frame, CS.mdps12))                                   
 
     str_log1 = '곡률={:05.1f}'.format(  self.model_speed )
-    str_log2 = '프레임율={:03.0f}  LCRV={:03.1f}  TPMS=FL:{:04.1f}/FR:{:04.1f}/RL:{:04.1f}/RR:{:04.1f}'.format( self.timer1.sampleTime(), self.new_steer_by_speed, CS.tpmsPressureFl, CS.tpmsPressureFr, CS.tpmsPressureRl, CS.tpmsPressureRr )
+    str_log2 = '프레임율={:03.0f}  TPMS=FL:{:04.1f}/FR:{:04.1f}/RL:{:04.1f}/RR:{:04.1f}'.format( self.timer1.sampleTime(), CS.tpmsPressureFl, CS.tpmsPressureFr, CS.tpmsPressureRl, CS.tpmsPressureRr )
     trace1.printf( '{}  {}'.format( str_log1, str_log2 ) )
 
     if CS.out.cruiseState.modeSel == 0 and self.mode_change_switch == 4:
