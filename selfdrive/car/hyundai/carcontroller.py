@@ -5,6 +5,7 @@ from selfdrive.car.hyundai.hyundaican import create_lkas11, create_clu11, create
 from selfdrive.car.hyundai.values import Buttons, SteerLimitParams, CAR
 from opendbc.can.packer import CANPacker
 from selfdrive.config import Conversions as CV
+from common.numpy_fast import interp
 
 # speed controller
 from selfdrive.car.hyundai.spdcontroller  import SpdController
@@ -60,6 +61,13 @@ class CarController():
     self.cruise_gap_set_init = 0
     self.cruise_gap_switch_timer = 0
 
+    self.new_steer_by_speed = 0.0
+    self.new_steer_by_speed_timer = 0
+    self.torq_vego = [16, 45]
+    self.new_torq_vego = [0.8, 0.3]
+
+
+
   def process_hud_alert(self, enabled, CC ):
     visual_alert = CC.hudControl.visualAlert
     left_lane = CC.hudControl.leftLaneVisible
@@ -109,8 +117,19 @@ class CarController():
 
     self.model_speed, self.model_sum = self.SC.calc_va(  sm, CS.out.vEgo  )
 
+    if (( CS.out.leftBlinker and not CS.out.rightBlinker) or ( CS.out.rightBlinker and not CS.out.leftBlinker)) or self.lanechange_manual_timer and CS.out.vEgo >= (60 * CV.KPH_TO_MS):
+      self.new_steer_by_speed_timer += 1
+      if self.new_steer_by_speed_timer < 100:
+        self.new_steer_by_speed = interp(CS.out.vEgo, self.torq_vego, self.new_torq_vego)
+        new_steer = actuators.steer * SteerLimitParams.STEER_MAX * self.new_steer_by_speed
+      else:
+        new_steer = actuators.steer * SteerLimitParams.STEER_MAX
+    else:
+      new_steer = actuators.steer * SteerLimitParams.STEER_MAX
+      self.new_steer_by_speed_timer = 0
+
     # Steering Torque
-    new_steer = actuators.steer * SteerLimitParams.STEER_MAX
+    #new_steer = actuators.steer * SteerLimitParams.STEER_MAX
     apply_steer = apply_std_steer_torque_limits(new_steer, self.apply_steer_last, CS.out.steeringTorque, SteerLimitParams)
     self.steer_rate_limited = new_steer != apply_steer
 
@@ -165,7 +184,7 @@ class CarController():
     can_sends.append(create_mdps12(self.packer, frame, CS.mdps12))                                   
 
     str_log1 = '곡률={:05.1f}'.format(  self.model_speed )
-    str_log2 = '프레임율={:03.0f}  TPMS=FL:{:04.1f}/FR:{:04.1f}/RL:{:04.1f}/RR:{:04.1f}'.format( self.timer1.sampleTime(), CS.tpmsPressureFl, CS.tpmsPressureFr, CS.tpmsPressureRl, CS.tpmsPressureRr )
+    str_log2 = '프레임율={:03.0f}  LCRV={:03.1f}  TPMS=FL:{:04.1f}/FR:{:04.1f}/RL:{:04.1f}/RR:{:04.1f}'.format( self.timer1.sampleTime(), self.new_steer_by_speed, CS.tpmsPressureFl, CS.tpmsPressureFr, CS.tpmsPressureRl, CS.tpmsPressureRr )
     trace1.printf( '{}  {}'.format( str_log1, str_log2 ) )
 
     if CS.out.cruiseState.modeSel == 0 and self.mode_change_switch == 4:
@@ -257,7 +276,7 @@ class CarController():
         self.resume_cnt += 1
       else:
         self.resume_cnt = 0
-      if self.dRel > 15 and self.cruise_gap_prev != CS.cruiseGapSet and self.cruise_gap_set_init == 1 and CS.out.cruiseState.modeSel != 3:
+      if self.dRel > 18 and self.cruise_gap_prev != CS.cruiseGapSet and self.cruise_gap_set_init == 1 and CS.out.cruiseState.modeSel != 3:
         self.cruise_gap_switch_timer += 1
         if self.cruise_gap_switch_timer > 30:
           can_sends.append(create_clu11(self.packer, frame, CS.scc_bus, CS.clu11, Buttons.GAP_DIST, clu11_speed))
