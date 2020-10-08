@@ -210,10 +210,7 @@ class CarController():
       else:
         self.lkas_switch = "-"
       
-      if CS.out.cruiseState.modeSel == 3:
-        str_log2 = '주행모드={:s}  LKAS버튼={:s}  정체구간=(D:{:05.1f}/GPR:{:2.1f}/CG:{:2.1f}/CSG:{:2.1f})'.format( self.steer_mode, self.lkas_switch, self.dRel, self.cruise_gap_prev, self.cruise_gap, CS.cruiseGapSet)
-      else:
-        str_log2 = '주행모드={:s}  MDPS상태={:s}  LKAS버튼={:s}'.format( self.steer_mode, self.mdps_status, self.lkas_switch )
+      str_log2 = '주행모드={:s}  MDPS상태={:s}  LKAS버튼={:s}  CG:{:1.0f}'.format( self.steer_mode, self.mdps_status, self.lkas_switch, CS.cruiseGapSet )
       trace1.printf2( '{}'.format( str_log2 ) )
 
     #print( 'st={} cmd={} long={}  steer={} req={}'.format(CS.out.cruiseState.standstill, pcm_cancel_cmd, self.CP.openpilotLongitudinalControl, apply_steer, steer_req ) )
@@ -242,7 +239,7 @@ class CarController():
         self.cruise_gap_set_init = 1
       elif CS.cruiseGapSet != 1.0:
         self.cruise_gap_switch_timer += 1
-        if self.cruise_gap_switch_timer > 50:
+        if self.cruise_gap_switch_timer > 200:
           can_sends.append(create_clu11(self.packer, frame, CS.scc_bus, CS.clu11, Buttons.GAP_DIST, clu11_speed))
           self.cruise_gap_switch_timer = 0
 
@@ -257,9 +254,9 @@ class CarController():
         self.resume_cnt += 1
       else:
         self.resume_cnt = 0
-      if self.dRel > 18 and self.cruise_gap_prev != CS.cruiseGapSet and self.cruise_gap_set_init == 1 and CS.out.cruiseState.modeSel != 3:
+      if self.dRel > 17 and self.cruise_gap_prev != CS.cruiseGapSet and self.cruise_gap_set_init == 1 and CS.out.cruiseState.modeSel != 3:
         self.cruise_gap_switch_timer += 1
-        if self.cruise_gap_switch_timer > 30:
+        if self.cruise_gap_switch_timer > 50:
           can_sends.append(create_clu11(self.packer, frame, CS.scc_bus, CS.clu11, Buttons.GAP_DIST, clu11_speed))
           self.cruise_gap_switch_timer = 0
       elif self.cruise_gap_prev == CS.cruiseGapSet:
