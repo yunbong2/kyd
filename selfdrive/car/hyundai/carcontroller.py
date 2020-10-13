@@ -10,7 +10,7 @@ from selfdrive.config import Conversions as CV
 from selfdrive.car.hyundai.spdcontroller  import SpdController
 from selfdrive.car.hyundai.spdctrl  import Spdctrl
 
-import common.log as trace1
+#import common.log as trace1
 import common.CTime1000 as tm
 
 VisualAlert = car.CarControl.HUDControl.VisualAlert
@@ -52,7 +52,7 @@ class CarController():
     self.hud_timer_left = 0
     self.hud_timer_right = 0
 
-    self.traceCC = trace1.Loger("CarController")
+    #self.traceCC = trace1.Loger("CarController")
 
     self.cruise_gap = 0
     self.cruise_gap_prev = 0
@@ -165,7 +165,7 @@ class CarController():
 
     str_log1 = '곡률={:05.1f}'.format(  self.model_speed )
     str_log2 = '프레임율={:03.0f}  TPMS=FL:{:04.1f}/FR:{:04.1f}/RL:{:04.1f}/RR:{:04.1f}'.format( self.timer1.sampleTime(), CS.tpmsPressureFl, CS.tpmsPressureFr, CS.tpmsPressureRl, CS.tpmsPressureRr )
-    trace1.printf( '{}  {}'.format( str_log1, str_log2 ) )
+    #trace1.printf( '{}  {}'.format( str_log1, str_log2 ) )
 
     if CS.out.cruiseState.modeSel == 0 and self.mode_change_switch == 4:
       self.mode_change_timer = 50
@@ -209,7 +209,7 @@ class CarController():
         self.lkas_switch = "-"
       
       str_log2 = '주행모드={:s}  MDPS상태={:s}  LKAS버튼={:s}  CG:{:1.0f}'.format( self.steer_mode, self.mdps_status, self.lkas_switch, CS.cruiseGapSet )
-      trace1.printf2( '{}'.format( str_log2 ) )
+      #trace1.printf2( '{}'.format( str_log2 ) )
 
 
     if pcm_cancel_cmd:

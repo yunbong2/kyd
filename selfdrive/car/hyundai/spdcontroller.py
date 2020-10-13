@@ -18,7 +18,7 @@ from common.numpy_fast import clip, interp
 from selfdrive.config import RADAR_TO_CAMERA
 
 
-import common.log as trace1
+#import common.log as trace1
 import common.CTime1000 as tm
 import common.MoveAvg as moveavg1
 
@@ -72,7 +72,7 @@ class SpdController():
 
         self.path_x = np.arange(192)
 
-        self.traceSC = trace1.Loger("SPD_CTRL")
+        #self.traceSC = trace1.Loger("SPD_CTRL")
 
         self.wheelbase = 2.8
         self.steerRatio = 13.5  # 13.5
@@ -246,7 +246,7 @@ class SpdController():
             CS.out.cruiseState.modeSel, target_set_speed, CS.VSetDis, CS.driverAcc_time, long_wait_cmd, self.long_curv_timer, self.seq_step_debug, CS.driverOverride )
         str4 = ' CS={:.1f}/{:.1f} '.format(  CS.lead_distance, CS.lead_objspd )
         str5 = str3 +  str4
-        trace1.printf2( str5 )
+        #trace1.printf2( str5 )
 
     def lead_control(self, CS, sm, CC ):
         dRel = CC.dRel
