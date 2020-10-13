@@ -1,5 +1,7 @@
 import os
 import math
+
+from common.numpy_fast import interp
 from common.realtime import sec_since_boot, DT_MDL
 from selfdrive.swaglog import cloudlog
 from selfdrive.controls.lib.lateral_mpc import libmpc_py
@@ -67,6 +69,10 @@ class PathPlanner():
     self.lane_change_timer = 0.0
     self.lane_change_ll_prob = 1.0
     self.prev_one_blinker = False
+
+    self.lane_change_adjust = [0.7, 1.3]
+    self.lane_change_adjust_vel = [16, 27]
+    self.lane_change_adjust_new = 0.0
 
   def setup_mpc(self):
     self.libmpc = libmpc_py.libmpc
@@ -144,7 +150,8 @@ class PathPlanner():
       # starting
       elif self.lane_change_state == LaneChangeState.laneChangeStarting:
         # fade out over .5s
-        self.lane_change_ll_prob = max(self.lane_change_ll_prob - 1.5*DT_MDL, 0.0)
+        self.lane_change_adjust_new = interp(v_ego, self.lane_change_adjust_vel, self.lane_change_adjust)
+        self.lane_change_ll_prob = max(self.lane_change_ll_prob - self.lane_change_adjust_new*DT_MDL, 0.0)
         # 98% certainty
         if lane_change_prob < 0.02 and self.lane_change_ll_prob < 0.01:
           self.lane_change_state = LaneChangeState.laneChangeFinishing
@@ -211,7 +218,7 @@ class PathPlanner():
       self.solution_invalid_cnt += 1
     else:
       self.solution_invalid_cnt = 0
-    plan_solution_valid = self.solution_invalid_cnt < 2
+    plan_solution_valid = self.solution_invalid_cnt < 3
 
     plan_send = messaging.new_message('pathPlan')
     plan_send.valid = sm.all_alive_and_valid(service_list=['carState', 'controlsState', 'liveParameters', 'model'])
