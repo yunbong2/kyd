@@ -320,7 +320,10 @@ void screen_toggle_lock() {
   }
 }
 
-void dashcam( UIState *s, int touch_x, int touch_y ) {
+bool dashcam( UIState *s, int touch_x, int touch_y ) {
+
+  bool touched = false;
+
   screen_draw_button(s, touch_x, touch_y);
   if (screen_button_clicked(touch_x,touch_y)) {
     click_elapsed_time = get_time() - click_time;
@@ -328,15 +331,25 @@ void dashcam( UIState *s, int touch_x, int touch_y ) {
     if (click_elapsed_time > 0) {
       click_time = get_time() + 1;
       screen_toggle_record_state();
+      touched = true;
     }
   }
 
   if (screen_lock_button_clicked(touch_x,touch_y,lock_button)) {
     screen_toggle_lock();
+    touched = true;
   }
-  if (!s->started) {
+  if (!s->vision_connected) {
     // Assume car is not in drive so stop recording
     stop_capture();
   }
+//  if (s->scene.v_ego > 2.1 && captureState == CAPTURE_STATE_NOT_CAPTURING && !s->scene.engaged) {
+//    start_capture();
+//  } else if (s->scene.v_ego < 1.5 && !s->scene.engaged) {
+  if (s->scene.controls_state.getVEgo() < 1.5 && !s->scene.controls_state.getEnabled()) {
+    stop_capture();
+  }
   s->scene.recording = (captureState != CAPTURE_STATE_NOT_CAPTURING);
+  
+  return touched;
 }

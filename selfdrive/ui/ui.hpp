@@ -162,6 +162,13 @@ typedef struct UIScene {
   float left_lane_points[MODEL_PATH_DISTANCE];
   float path_points[MODEL_PATH_DISTANCE];
   float right_lane_points[MODEL_PATH_DISTANCE];
+
+  struct _STATUS_
+  {
+      char text1[512];
+      char text2[512];
+  } alert;
+
 } UIScene;
 
 typedef struct {
