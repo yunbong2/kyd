@@ -15,7 +15,7 @@ import common.log as trace1
 LaneChangeState = log.PathPlan.LaneChangeState
 LaneChangeDirection = log.PathPlan.LaneChangeDirection
 
-LOG_MPC = os.environ.get('LOG_MPC', True)
+LOG_MPC = True
 
 LANE_CHANGE_SPEED_MIN = 59 * CV.KPH_TO_MS
 LANE_CHANGE_TIME_MAX = 10.
