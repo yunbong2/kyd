@@ -74,6 +74,8 @@ class PathPlanner():
     self.lane_change_adjust_vel = [16, 27]
     self.lane_change_adjust_new = 0.0
 
+    self.lean_wait_time = 0
+
   def setup_mpc(self):
     self.libmpc = libmpc_py.libmpc
     self.libmpc.init(MPC_COST_LAT.PATH, MPC_COST_LAT.LANE, MPC_COST_LAT.HEADING, self.steer_rate_cost)
