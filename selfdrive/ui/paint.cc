@@ -571,15 +571,16 @@ static void ui_draw_gear( UIState *s )
   NVGcolor nColor = COLOR_WHITE;
 
   int  ngetGearShifter = int(scene.getGearShifter);
-  int  x_pos = 1700;
+  int  x_pos = 1735;
   int  y_pos = 200;
   char str_msg[512];
 
-  nvgFontSize(s->vg, 150 );
+  nvgFontFace(s->vg, "sans-bold");
+  nvgFontSize(s->vg, 160 );
   switch( ngetGearShifter )
   {
     case 1 : strcpy( str_msg, "P" ); nColor = nvgRGBA(200, 200, 255, 255); break;
-    case 2 : strcpy( str_msg, "D" ); nColor = nvgRGBA(200, 200, 255, 255); break;
+    case 2 : strcpy( str_msg, "D" ); nColor = nvgRGBA(0, 255, 0, 255); break;
     case 3 : strcpy( str_msg, "N" ); nColor = COLOR_WHITE; break;
     case 4 : strcpy( str_msg, "R" ); nColor = COLOR_RED; break;
     case 7 : strcpy( str_msg, "B" ); break;
