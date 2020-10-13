@@ -70,11 +70,9 @@ class PathPlanner():
     self.lane_change_ll_prob = 1.0
     self.prev_one_blinker = False
 
-    self.lane_change_adjust = [0.7, 1.3]
+    self.lane_change_adjust = [0.7, 1.4]
     self.lane_change_adjust_vel = [16, 27]
     self.lane_change_adjust_new = 0.0
-
-    self.lean_wait_time = 0
 
   def setup_mpc(self):
     self.libmpc = libmpc_py.libmpc
@@ -96,8 +94,6 @@ class PathPlanner():
     v_ego = sm['carState'].vEgo
     angle_steers = sm['carState'].steeringAngle
     active = sm['controlsState'].active
-    
-    vCurvature = sm['controlsState'].vCurvature
 
     angle_offset = sm['liveParameters'].angleOffset
 
@@ -186,24 +182,7 @@ class PathPlanner():
       self.LP.l_prob *= self.lane_change_ll_prob
       self.LP.r_prob *= self.lane_change_ll_prob
       
-      
-    vCurv = vCurvature
-    if vCurvature > 1 and v_ego < 20: # left
-      if vCurv > 4:
-        vCurv = 4
-      self.lean_offset = -0.02 - (vCurv * 0.01)
-      self.lean_wait_time = 300
-    #elif vCurvature < -1:   # right
-    #  if vCurv < -4:
-    #    vCurv = -4      
-    #  self.lean_offset = -0.02 + (vCurv * 0.01)
-    #  self.lean_wait_time = 10
-    lean_offset = 0
-    if self.lean_wait_time:
-      self.lean_wait_time -= 1
-      lean_offset = self.lean_offset
-      
-    self.LP.update_d_poly(v_ego, lean_offset)
+    self.LP.update_d_poly(v_ego)
 
     # account for actuation delay
     self.cur_state = calc_states_after_delay(self.cur_state, v_ego, angle_steers - angle_offset, curvature_factor, VM.sR, CP.steerActuatorDelay)
