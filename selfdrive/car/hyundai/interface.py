@@ -22,11 +22,11 @@ class CarInterface(CarInterfaceBase):
     ret = CarInterfaceBase.get_std_params(candidate, fingerprint, has_relay)
 
     ret.carName = "hyundai"
-    ret.safetyModel = car.CarParams.SafetyModel.hyundaiCommunity
+    ret.safetyModel = car.CarParams.SafetyModel.hyundai
     ret.radarOffCan = False
 
     # Most Hyundai car ports are community features for now
-    ret.communityFeature = candidate not in [CAR.SONATA, CAR.PALISADE]
+    ret.communityFeature = False
 
     tire_stiffness_factor = 1.
     ret.steerActuatorDelay = 0.2
