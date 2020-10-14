@@ -208,7 +208,6 @@ typedef struct UIState {
   int img_network[6];
 
   SubMaster *sm;
-  PubMaster *pm;
 
   Sound *sound;
   UIStatus status;
