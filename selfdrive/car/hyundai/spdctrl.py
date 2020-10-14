@@ -4,7 +4,7 @@ from common.numpy_fast import clip, interp
 
 from selfdrive.car.hyundai.spdcontroller  import SpdController
 
-#import common.log as trace1
+import common.log as trace1
 
 
 class Spdctrl(SpdController):
@@ -156,4 +156,4 @@ class Spdctrl(SpdController):
         str4 = '  차=D:{:05.1f}/V:{:03.0f}  구분={:s}'.format(  CS.lead_distance, CS.lead_objspd, self.seq_step_debug )
 
         str5 = str3 + str4
-        #trace1.printf2( str5 )
+        trace1.printf2( str5 )
