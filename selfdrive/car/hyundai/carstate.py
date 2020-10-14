@@ -89,7 +89,17 @@ class CarState(CarStateBase):
     # cruise state
     self.main_on = (cp_scc.vl["SCC11"]["MainMode_ACC"] != 0)  # 1056
     self.acc_active = (cp_scc.vl["SCC12"]['ACCMode'] != 0)    # 1057
-    self.update_atom( cp, cp2, cp_cam )
+    self.driverOverride = cp.vl["TCS13"]["DriverOverride"]     # 1 Acc,  2 bracking, 0 Normal
+    self.cruise_main_button = cp.vl["CLU11"]["CF_Clu_CruiseSwMain"]
+    self.cruise_buttons = cp.vl["CLU11"]["CF_Clu_CruiseSwState"]         # clu_CruiseSwState
+    self.Lkas_LdwsSysState = cp_cam.vl["LKAS11"]["CF_Lkas_LdwsSysState"]
+    self.lkas_error = self.Lkas_LdwsSysState  == 7
+    if not self.lkas_error:
+      self.lkas_button_on = self.Lkas_LdwsSysState 
+    if self.driverOverride == 1:
+      self.driverAcc_time = 100
+    elif self.driverAcc_time:
+      self.driverAcc_time -= 1
 
     ret.cruiseState.available = self.main_on
     ret.cruiseState.enabled =  ret.cruiseState.available
@@ -174,22 +184,6 @@ class CarState(CarStateBase):
     leftBlinker = self.left_blinker_flash != 0
     rightBlinker = self.right_blinker_flash != 0
     return  leftBlinker, rightBlinker
-
-  def update_atom(self, cp, cp2, cp_cam):
-    # atom append
-    self.driverOverride = cp.vl["TCS13"]["DriverOverride"]     # 1 Acc,  2 bracking, 0 Normal
-    self.cruise_main_button = cp.vl["CLU11"]["CF_Clu_CruiseSwMain"]
-    self.cruise_buttons = cp.vl["CLU11"]["CF_Clu_CruiseSwState"]         # clu_CruiseSwState
-    self.Lkas_LdwsSysState = cp_cam.vl["LKAS11"]["CF_Lkas_LdwsSysState"]
-    self.lkas_error = self.Lkas_LdwsSysState  == 7
-    if not self.lkas_error:
-      self.lkas_button_on = self.Lkas_LdwsSysState 
-
-    if self.driverOverride == 1:
-      self.driverAcc_time = 100
-    elif self.driverAcc_time:
-      self.driverAcc_time -= 1
-
 
   def get_gearShifter(self, cp):
     gearShifter = GearShifter.unknown 
