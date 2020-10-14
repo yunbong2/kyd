@@ -1,12 +1,38 @@
+bool HKG_LCAN_on_bus1 = false;
+bool HKG_forward_bus1 = false;
+bool HKG_forward_obd = false;
+bool HKG_forward_bus2 = true;
+int HKG_obd_int_cnt = 10;
+int HKG_LKAS_bus0_cnt = 0;
 int HKG_MDPS12_checksum = -1;
-int HKG_MDPS12_cnt = 0;   
+int HKG_MDPS12_cnt = 0;
 int HKG_last_StrColT = 0;
+
 int default_rx_hook(CAN_FIFOMailBox_TypeDef *to_push) {
   int bus = GET_BUS(to_push);
   int addr = GET_ADDR(to_push);
 
-  if ((bus == 0) && (addr == 593 || addr == 897)) {
-    hyundai_community_mdps_harness_present = false;
+  if (addr == 832 && bus == 2) {
+    if (HKG_obd_int_cnt > 1) {HKG_obd_int_cnt -= 1;}
+  }
+  // check if we have a LCAN on Bus1
+  if (bus == 1 && (addr == 1296 || addr == 524)) {
+    if (HKG_forward_bus1 || !HKG_LCAN_on_bus1) {
+      HKG_LCAN_on_bus1 = true;
+      HKG_forward_bus1 = false;
+    }
+  }
+  // check if we have a MDPS or SCC on Bus1
+  if (bus == 1 && (addr == 593 || addr == 897 || addr == 1057) && !HKG_LCAN_on_bus1) {
+    if (HKG_forward_bus1 != true) {
+      HKG_forward_bus1 = true;
+      if (HKG_obd_int_cnt > 0) {HKG_forward_obd = true;}
+    }
+  }
+  // set CAN2 mode to normal if int_cnt expaired
+  if (HKG_obd_int_cnt == 1) {
+    if (!HKG_forward_obd) {current_board->set_can_mode(CAN_MODE_NORMAL);}
+    HKG_obd_int_cnt = 0;
   }
 
   if ((addr == 593) && (HKG_MDPS12_checksum == -1)){
@@ -37,6 +63,9 @@ static void nooutput_init(int16_t param) {
   UNUSED(param);
   controls_allowed = false;
   relay_malfunction_reset();
+  if (board_has_obd() && (HKG_forward_obd || HKG_obd_int_cnt > 0)) {
+    current_board->set_can_mode(CAN_MODE_OBD_CAN2);
+  }
 }
 
 static int nooutput_tx_hook(CAN_FIFOMailBox_TypeDef *to_send) {
@@ -54,20 +83,15 @@ static int nooutput_tx_lin_hook(int lin_num, uint8_t *data, int len) {
 static int default_fwd_hook(int bus_num, CAN_FIFOMailBox_TypeDef *to_fwd) {
   int addr = GET_ADDR(to_fwd);
   int bus_fwd = -1;
-  if (bus_num == 0) {
-     if (hyundai_community_mdps_harness_present) {
-       bus_fwd = 12;
-     }
+
+  if (bus_num == 0 && HKG_forward_bus1) {
+    bus_fwd = HKG_forward_bus1 ? 12 : 2;
   }
-  if (bus_num == 1) {
-     if (hyundai_community_mdps_harness_present) {
-       bus_fwd = 20;
-     }
+  if (bus_num == 1 && HKG_forward_bus1) {
+    bus_fwd = 20;
   }
   if (bus_num == 2) {
-     if (hyundai_community_mdps_harness_present) {
-       bus_fwd = 10;
-     }
+    bus_fwd = HKG_forward_bus1 ? 10 : 0;
   }
     // Code for LKA/LFA/HDA anti-nagging.
   if (addr == 593 && bus_fwd != -1) {
@@ -97,7 +121,7 @@ static int default_fwd_hook(int bus_num, CAN_FIFOMailBox_TypeDef *to_fwd) {
       to_fwd->RDHR |= OutTq << 20;
       HKG_last_StrColT = StrColTq;
       dat[3] = 0;
-      if (!HKG_MDPS12_checksum) { 
+      if (!HKG_MDPS12_checksum) {
         for (int i=0; i<8; i++) {
           New_Chksum2 += dat[i];
         }
@@ -144,6 +168,9 @@ static void alloutput_init(int16_t param) {
   UNUSED(param);
   controls_allowed = true;
   relay_malfunction_reset();
+  if (board_has_obd() && HKG_forward_obd) {
+    current_board->set_can_mode(CAN_MODE_OBD_CAN2);
+  }
 }
 
 static int alloutput_tx_hook(CAN_FIFOMailBox_TypeDef *to_send) {

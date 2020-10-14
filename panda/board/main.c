@@ -123,9 +123,8 @@ void set_safety_mode(uint16_t mode, int16_t param) {
   }
   switch (mode_copy) {
     case SAFETY_SILENT:
-      set_intercept_relay(false);
+      set_intercept_relay(true);
       if (board_has_obd()) {
-        set_intercept_relay(true);
         current_board->set_can_mode(CAN_MODE_NORMAL);
       }
       can_silent = ALL_CAN_SILENT;
@@ -141,11 +140,7 @@ void set_safety_mode(uint16_t mode, int16_t param) {
       set_intercept_relay(true);
       heartbeat_counter = 0U;
       if (board_has_obd()) {
-        if ((hyundai_community_mdps_harness_present) && (hyundai_community_mdps_harness_type == 1)) {
-          current_board->set_can_mode(CAN_MODE_NORMAL);
-        } else {
-          current_board->set_can_mode(CAN_MODE_OBD_CAN2);
-        }
+        current_board->set_can_mode(CAN_MODE_OBD_CAN2);
       }
       can_silent = ALL_CAN_LIVE;
       break;
@@ -153,11 +148,7 @@ void set_safety_mode(uint16_t mode, int16_t param) {
       set_intercept_relay(true);
       heartbeat_counter = 0U;
       if (board_has_obd()) {
-        if ((hyundai_community_mdps_harness_present) && (hyundai_community_mdps_harness_type == 2)) {
-          current_board->set_can_mode(CAN_MODE_OBD_CAN2);
-        } else {
-          current_board->set_can_mode(CAN_MODE_NORMAL);
-        }
+        current_board->set_can_mode(CAN_MODE_NORMAL);
       }
       can_silent = ALL_CAN_LIVE;
       break;
@@ -728,15 +719,13 @@ void TIM1_BRK_TIM9_IRQ_Handler(void) {
         puts("EON hasn't sent a heartbeat for 0x");
         puth(heartbeat_counter);
         puts(" seconds. Safety is set to SILENT mode.\n");
-/* cancel power save mode to allow continuous port forwarding*/
-        if (current_safety_mode != SAFETY_ALLOUTPUT) {
-          set_safety_mode(SAFETY_ALLOUTPUT, 0U);
-        }
-/*
-        if (power_save_status != POWER_SAVE_STATUS_ENABLED) {
-          set_power_save_state(POWER_SAVE_STATUS_ENABLED);
-        }
-*/
+      if (current_safety_mode != SAFETY_NOOUTPUT) {
+        set_safety_mode(SAFETY_NOOUTPUT, 0U); // MDPS will hard fault if SAFETY_SILENT set
+      }
+     // if (power_save_status != POWER_SAVE_STATUS_ENABLED) {
+     //   set_power_save_state(POWER_SAVE_STATUS_ENABLED);
+     // } // MDPS will hard fault if panda slept
+
         // Also disable IR when the heartbeat goes missing
         current_board->set_ir_power(0U);
 
@@ -845,7 +834,7 @@ int main(void) {
   // use TIM2->CNT to read
 
   // init to SILENT and can silent
-  set_safety_mode(SAFETY_ALLOUTPUT, 0);
+  set_safety_mode(SAFETY_NOOUTPUT, 0); // MDPS will hard fault if SAFETY_SILENT set
 
   // enable CAN TXs
   current_board->enable_can_transceivers(true);
