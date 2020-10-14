@@ -4,7 +4,6 @@ from selfdrive.car.hyundai.values import DBC, STEER_THRESHOLD, FEATURES, EV_HYBR
 from selfdrive.car.interfaces import CarStateBase
 from opendbc.can.parser import CANParser
 from selfdrive.config import Conversions as CV
-from selfdrive.car.hyundai.spdcontroller  import SpdController
 from selfdrive.car.hyundai.values import Buttons
 
 GearShifter = car.CarState.GearShifter
@@ -31,8 +30,6 @@ class CarState(CarStateBase):
 
     self.main_on = False
     self.acc_active = False
-    
-    self.cruiseState_modeSel = 0
 
     self.driverAcc_time = 0
 
@@ -45,8 +42,6 @@ class CarState(CarStateBase):
     self.right_blinker_flash = 0  
     self.TSigLHSw = 0
     self.TSigRHSw = 0
-
-    self.SC = SpdController()
 
   def update(self, cp, cp2, cp_cam):
     cp_mdps = cp2 if self.mdps_bus else cp
@@ -96,17 +91,15 @@ class CarState(CarStateBase):
     self.acc_active = (cp_scc.vl["SCC12"]['ACCMode'] != 0)    # 1057
     self.update_atom( cp, cp2, cp_cam )
 
-    ret.cruiseState.available = self.main_on and self.cruiseState_modeSel != 4
+    ret.cruiseState.available = self.main_on
     ret.cruiseState.enabled =  ret.cruiseState.available
     ret.cruiseState.standstill = cp_scc.vl["SCC11"]['SCCInfoDisplay'] == 4.
     
     self.is_set_speed_in_mph = int(cp.vl["CLU11"]["CF_Clu_SPEED_UNIT"])
 
-    self.cruiseState_modeSel , speed_kph = self.SC.update_cruiseSW( self )
-    ret.cruiseState.modeSel = self.cruiseState_modeSel
     if self.acc_active:
       speed_conv = CV.MPH_TO_MS if self.is_set_speed_in_mph else CV.KPH_TO_MS
-      ret.cruiseState.speed = speed_kph * speed_conv
+      ret.cruiseState.speed = cp.vl["SCC11"]['VSetDis'] * speed_conv
     else:
       ret.cruiseState.speed = 0
 
@@ -119,7 +112,7 @@ class CarState(CarStateBase):
 
     if self.CP.carFingerprint in EV_HYBRID:
       ret.gas = cp.vl["E_EMS11"]['Accel_Pedal_Pos'] / 256.
-      ret.gasPressed = ret.gas > 5
+      ret.gasPressed = ret.gas > 0
     else:
       ret.gas = cp.vl["EMS12"]['PV_AV_CAN'] / 100
       ret.gasPressed = bool(cp.vl["EMS16"]["CF_Ems_AclAct"])
@@ -164,14 +157,14 @@ class CarState(CarStateBase):
     rightBlinker = cp.vl["CGW1"]['CF_Gway_TurnSigRh'] != 0
 
     if leftBlinker and not rightBlinker:
-      self.left_blinker_flash = 200
+      self.left_blinker_flash = 150
       self.right_blinker_flash = 0
     elif rightBlinker and not leftBlinker:
-      self.right_blinker_flash = 200
+      self.right_blinker_flash = 150
       self.left_blinker_flash = 0
     elif leftBlinker and rightBlinker:
-      self.left_blinker_flash = 200
-      self.right_blinker_flash = 200
+      self.left_blinker_flash = 150
+      self.right_blinker_flash = 150
 
     if  self.left_blinker_flash:
       self.left_blinker_flash -= 1
