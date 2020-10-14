@@ -111,6 +111,7 @@ class Controls:
     elif self.CP.lateralTuning.which() == 'lqr':
       self.LaC = LatControlLQR(self.CP)
 
+    self.controlsAllowed = False
     self.state = State.disabled
     self.enabled = False
     self.active = False
@@ -148,6 +149,13 @@ class Controls:
     # controlsd is driven by can recv, expected at 100Hz
     self.rk = Ratekeeper(100, print_delay_threshold=None)
     self.prof = Profiler(False)  # off by default
+
+    self.hyundai_lkas = self.read_only  #read_only
+
+  def auto_enable(self, CS):
+    if self.state != State.enabled and CS.vEgo >= 15 * CV.KPH_TO_MS and CS.gearShifter == 2:
+      if self.sm.all_alive_and_valid() and self.enabled != self.controlsAllowed:
+        self.events.add( EventName.pcmEnable )
 
   def update_events(self, CS):
     """Compute carEvents from carState"""
@@ -239,6 +247,8 @@ class Controls:
     #  and self.CP.openpilotLongitudinalControl and CS.vEgo < 0.3:
     #  self.events.add(EventName.noTarget)
 
+    self.auto_enable( CS )
+
   def data_sample(self):
     """Receive data from sockets and update carState"""
 
@@ -260,9 +270,11 @@ class Controls:
     # another socket other than the CAN messages and one can arrive earlier than the other.
     # Therefore we allow a mismatch for two samples, then we trigger the disengagement.
 
+    self.controlsAllowed = self.sm['health'].controlsAllowed
+
     if not self.enabled:
       self.mismatch_counter = 0
-    if not self.sm['health'].controlsAllowed and self.enabled:
+    elif not self.controlsAllowed and self.enabled:
       self.mismatch_counter += 1
 
     self.distance_traveled += CS.vEgo * DT_CTRL
@@ -451,9 +463,9 @@ class Controls:
     self.AM.process_alerts(self.sm.frame)
     CC.hudControl.visualAlert = self.AM.visual_alert
 
-    if not self.read_only:
+    if not self.hyundai_lkas and self.enabled:
       # send car controls over can
-      can_sends = self.CI.apply(CC)
+      can_sends = self.CI.apply(CC, self.sm, self.CP )
       self.pm.send('sendcan', can_list_to_can_capnp(can_sends, msgtype='sendcan', valid=CS.canValid))
 
     force_decel = (self.sm['dMonitoringState'].awarenessStatus < 0.) or \
@@ -552,9 +564,14 @@ class Controls:
     CS = self.data_sample()
     self.prof.checkpoint("Sample")
 
+    if self.read_only:
+      self.hyundai_lkas = self.read_only
+    elif CS.cruiseState.enabled and self.hyundai_lkas:
+      self.hyundai_lkas = False
+
     self.update_events(CS)
 
-    if not self.read_only:
+    if not self.hyundai_lkas:
       # Update control state
       self.state_transition(CS)
       self.prof.checkpoint("State transition")
@@ -567,6 +584,9 @@ class Controls:
     # Publish data
     self.publish_logs(CS, start_time, actuators, v_acc, a_acc, lac_log)
     self.prof.checkpoint("Sent")
+
+    if not CS.cruiseState.enabled and not self.hyundai_lkas:
+      self.hyundai_lkas = True
 
   def controlsd_thread(self):
     while True:
