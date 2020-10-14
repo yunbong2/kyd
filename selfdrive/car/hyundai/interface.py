@@ -11,6 +11,7 @@ ButtonType = car.CarState.ButtonEvent.Type
 class CarInterface(CarInterfaceBase):
   def __init__(self, CP, CarController, CarState):
     super().__init__(CP, CarController, CarState )
+    self.buttonEvents = []
     self.cp2 = self.CS.get_can2_parser(CP)
     
   @staticmethod
@@ -156,8 +157,8 @@ class CarInterface(CarInterfaceBase):
     self.CS.out = ret.as_reader()
     return self.CS.out
 
-  def apply(self, c, sm, CP ):
-    can_sends = self.CC.update(c, self.CS, self.frame, sm, CP )
+  def apply(self, c):
+    can_sends = self.CC.update(c, self.CS, self.frame)
 
     self.frame += 1
     return can_sends
