@@ -92,8 +92,6 @@ class CarState(CarStateBase):
     self.Mdps_ToiUnavail = cp_mdps.vl["MDPS12"]['CF_Mdps_ToiUnavail']
     
     # cruise state
-    #ret.cruiseState.available = True
-    #ret.cruiseState.enabled = cp_scc.vl["SCC12"]['ACCMode'] != 0
     self.main_on = (cp_scc.vl["SCC11"]["MainMode_ACC"] != 0)  # 1056
     self.acc_active = (cp_scc.vl["SCC12"]['ACCMode'] != 0)    # 1057
     self.update_atom( cp, cp2, cp_cam )
@@ -121,7 +119,7 @@ class CarState(CarStateBase):
 
     if self.CP.carFingerprint in EV_HYBRID:
       ret.gas = cp.vl["E_EMS11"]['Accel_Pedal_Pos'] / 256.
-      ret.gasPressed = ret.gas > 0
+      ret.gasPressed = ret.gas > 5
     else:
       ret.gas = cp.vl["EMS12"]['PV_AV_CAN'] / 100
       ret.gasPressed = bool(cp.vl["EMS16"]["CF_Ems_AclAct"])
@@ -214,7 +212,8 @@ class CarState(CarStateBase):
         gearShifter = GearShifter.park
       elif cp.vl["CLU15"]["CF_Clu_InhibitR"] == 1:
         gearShifter = GearShifter.reverse
-
+      else:
+        gearShifter = GearShifter.unknown
     # Gear Selecton via TCU12
     elif self.CP.carFingerprint in FEATURES["use_tcu_gears"]:
       gear = cp.vl["TCU12"]["CUR_GR"]
@@ -224,7 +223,8 @@ class CarState(CarStateBase):
         gearShifter = GearShifter.reverse
       elif gear > 0 and gear < 9:    # unaware of anything over 8 currently
         gearShifter = GearShifter.drive
-
+      else:
+        gearShifter = GearShifter.unknown
     # Gear Selecton - This is only compatible with optima hybrid 2017
     elif self.CP.carFingerprint in FEATURES["use_elect_gears"]:
       gear = cp.vl["ELECT_GEAR"]["Elect_Gear_Shifter"]
@@ -236,7 +236,8 @@ class CarState(CarStateBase):
         gearShifter = GearShifter.park
       elif gear == 7:
         gearShifter = GearShifter.reverse
-
+      else:
+        ret.gearShifter = GearShifter.unknown
     # Gear Selecton - This is not compatible with all Kia/Hyundai's, But is the best way for those it is compatible with
     else:
       gear = cp.vl["LVR12"]["CF_Lvr_Gear"]
@@ -248,6 +249,8 @@ class CarState(CarStateBase):
         gearShifter = GearShifter.park
       elif gear == 7:
         gearShifter = GearShifter.reverse
+      else:
+        gearShifter = GearShifter.unknown
 
     return gearShifter
 

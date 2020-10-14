@@ -137,8 +137,8 @@ class Controls:
 
     if not sounds_available:
       self.events.add(EventName.soundsUnavailable, static=True)
-    if internet_needed:
-      self.events.add(EventName.internetConnectivityNeeded, static=True)
+    #if internet_needed:
+    #  self.events.add(EventName.internetConnectivityNeeded, static=True)
     if community_feature_disallowed:
       self.events.add(EventName.communityFeatureDisallowed, static=True)
     if not car_recognized:
@@ -213,7 +213,7 @@ class Controls:
       self.events.add(EventName.radarCommIssue)
     elif not self.sm.all_alive_and_valid():
       self.events.add(EventName.commIssue)
-    if not self.sm['pathPlan'].mpcSolutionValid:
+    if not self.sm['pathPlan'].mpcSolutionValid and not (EventName.laneChangeManual in self.events.names):
       self.events.add(EventName.plannerError)
     if not self.sm['liveLocationKalman'].sensorsOK and not NOSENSOR:
       if self.sm.frame > 5 / DT_CTRL:  # Give locationd some time to receive all the inputs
@@ -228,9 +228,9 @@ class Controls:
       self.events.add(EventName.posenetInvalid)
     if not self.sm['liveLocationKalman'].deviceStable:
       self.events.add(EventName.deviceFalling)
-    if not self.sm['frame'].recoverState < 2:
+    #if not self.sm['frame'].recoverState < 2:
       # counter>=2 is active
-      self.events.add(EventName.focusRecoverActive)
+    #  self.events.add(EventName.focusRecoverActive)
     if not self.sm['plan'].radarValid:
       self.events.add(EventName.radarFault)
     if self.sm['plan'].radarCanError:
@@ -287,8 +287,9 @@ class Controls:
     self.v_cruise_kph_last = self.v_cruise_kph
 
     # if stock cruise is completely disabled, then we can use our own set speed logic
+    self.CP.enableCruise = self.CI.CP.enableCruise
     if not self.CP.enableCruise:
-      self.v_cruise_kph = update_v_cruise(self.v_cruise_kph, CS.buttonEvents, self.enabled)
+      self.v_cruise_kph = update_v_cruise(self.v_cruise_kph, CS.buttonEvents, self.enabled, self.is_metric)
     elif self.CP.enableCruise and CS.cruiseState.enabled:
       self.v_cruise_kph = CS.cruiseState.speed * CV.MS_TO_KPH
 
@@ -422,7 +423,7 @@ class Controls:
     CC.actuators = actuators
 
     CC.cruiseControl.override = True
-    CC.cruiseControl.cancel = not self.CP.enableCruise or (not self.enabled and CS.cruiseState.enabled)
+    CC.cruiseControl.cancel = self.CP.enableCruise and not self.enabled and CS.cruiseState.enabled
 
     # Some override values for Honda
     # brake discount removes a sharp nonlinearity

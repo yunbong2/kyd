@@ -15,7 +15,7 @@ import common.log as trace1
 LaneChangeState = log.PathPlan.LaneChangeState
 LaneChangeDirection = log.PathPlan.LaneChangeDirection
 
-LOG_MPC = True
+LOG_MPC = os.environ.get('LOG_MPC', True)
 
 LANE_CHANGE_SPEED_MIN = 59 * CV.KPH_TO_MS
 LANE_CHANGE_TIME_MAX = 10.
@@ -222,8 +222,7 @@ class PathPlanner():
 
     plan_send.pathPlan.angleSteers = float(self.angle_steers_des_mpc)
     plan_send.pathPlan.rateSteers = float(rate_desired)
-    #plan_send.pathPlan.angleOffset = float(sm['liveParameters'].angleOffsetAverage)
-    plan_send.pathPlan.angleOffset = float(sm['liveParameters'].angleOffset)
+    plan_send.pathPlan.angleOffset = float(sm['liveParameters'].angleOffsetAverage)
     plan_send.pathPlan.mpcSolutionValid = bool(plan_solution_valid)
     plan_send.pathPlan.paramsValid = bool(sm['liveParameters'].valid)
 

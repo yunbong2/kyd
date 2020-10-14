@@ -29,9 +29,9 @@ class CarInterface(CarInterfaceBase):
     ret.communityFeature = False
 
     tire_stiffness_factor = 1.
-    ret.steerActuatorDelay = 0.3
-    ret.steerRateCost = 0.4
-    ret.steerLimitTimer = 0.4
+    ret.steerActuatorDelay = 0.2
+    ret.steerRateCost = 0.5
+    ret.steerLimitTimer = 0.8
 
     if candidate == CAR.KIA_OPTIMA_H:
       ret.wheelbase = 2.80
@@ -42,11 +42,11 @@ class CarInterface(CarInterfaceBase):
       #ret.lateralTuning.pid.kiBP, ret.lateralTuning.pid.kpBP = [[0.], [0.]]
       #ret.lateralTuning.pid.kpV, ret.lateralTuning.pid.kiV = [[0.20], [0.04]]
       ret.lateralTuning.pid.kpBP = [0., 9., 17., 28.]   #0, 32.4m/s, 61.2m/s 100.8m/s
-      ret.lateralTuning.pid.kpV = [0.10, 0.14, 0.18, 0.22]
+      ret.lateralTuning.pid.kpV = [0.16, 0.18, 0.20, 0.22]
       ret.lateralTuning.pid.kiBP = [0., 9., 17., 28.]
-      ret.lateralTuning.pid.kiV = [0.02, 0.03, 0.035, 0.045]
+      ret.lateralTuning.pid.kiV = [0.03, 0.035, 0.04, 0.045]
       ret.lateralTuning.pid.kfBP = [0., 9., 17., 28.]
-      ret.lateralTuning.pid.kfV = [0.00002, 0.00003, 0.00005, 0.00007]
+      ret.lateralTuning.pid.kfV = [0.00003, 0.00004, 0.00005, 0.00006]
 
       
       #ret.lateralTuning.init('lqr')
@@ -102,21 +102,18 @@ class CarInterface(CarInterfaceBase):
     buttonEvents = []
     if self.CS.cruise_buttons != self.CS.prev_cruise_buttons:
       be = car.CarState.ButtonEvent.new_message()
-      be.type = ButtonType.unknown
-      if self.CS.cruise_buttons != 0:
-        be.pressed = True
-        but = self.CS.cruise_buttons
-      else:
-        be.pressed = False
-        but = self.CS.prev_cruise_buttons
+      be.pressed = self.CS.cruise_buttons != 0 
+      but = self.CS.cruise_buttons if be.pressed else self.CS.prev_cruise_buttons
       if but == Buttons.RES_ACCEL:
         be.type = ButtonType.accelCruise
       elif but == Buttons.SET_DECEL:
         be.type = ButtonType.decelCruise
       elif but == Buttons.GAP_DIST:
         be.type = ButtonType.gapAdjustCruise
-      elif but == Buttons.CANCEL:
-        be.type = ButtonType.cancel
+      #elif but == Buttons.CANCEL:
+      #  be.type = ButtonType.cancel
+      else:
+        be.type = ButtonType.unknown
       buttonEvents.append(be)
     if self.CS.cruise_main_button != self.CS.prev_cruise_main_button:
       be = car.CarState.ButtonEvent.new_message()
@@ -124,10 +121,8 @@ class CarInterface(CarInterfaceBase):
       be.pressed = bool(self.CS.cruise_main_button)
       buttonEvents.append(be)
     ret.buttonEvents = buttonEvents
-    #ret.buttonEvents = []    
 
     events = self.create_common_events(ret)
-    #TODO: addd abs(self.CS.angle_steers) > 90 to 'steerTempUnavailable' event
 
     if self.CC.lanechange_manual_timer:
       events.add(EventName.laneChangeManual)
@@ -152,6 +147,22 @@ class CarInterface(CarInterfaceBase):
       self.low_speed_alert = False
     if self.low_speed_alert:
       events.add(car.CarEvent.EventName.belowSteerSpeed)
+
+  # handle button presses
+    for b in ret.buttonEvents:
+      # do disable on button down
+      if b.type == ButtonType.cancel and b.pressed:
+        events.add(EventName.buttonCancel)
+      if b.type in [ButtonType.accelCruise, ButtonType.decelCruise] and not b.pressed:
+        events.add(EventName.buttonEnable)
+      if EventName.wrongCarMode in events.events:
+        events.events.remove(EventName.wrongCarMode)
+      if EventName.pcmDisable in events.events:
+        events.events.remove(EventName.pcmDisable)
+      if ret.cruiseState.enabled:
+        # do enable on decel button only
+        if b.type == ButtonType.decelCruise and not b.pressed:
+          events.add(EventName.buttonEnable)
 
     ret.events = events.to_msg()
 
