@@ -40,7 +40,7 @@ class CarInterface(CarInterfaceBase):
     ret.steerActuatorDelay = 0.25
 
 
-    if candidate == CAR.KIA_OPTIMA_H:
+    if candidate == CAR.OPTIMA_HEV:
       ret.wheelbase = 2.80
       ret.mass = 1595. + STD_CARGO_KG
       ret.steerRatio = 14.0

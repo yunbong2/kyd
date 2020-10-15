@@ -14,7 +14,7 @@ from cereal import log
 LaneChangeState = log.PathPlan.LaneChangeState
 LaneChangeDirection = log.PathPlan.LaneChangeDirection
 
-LOG_MPC = os.environ.get('LOG_MPC', True)
+LOG_MPC = True # os.environ.get('LOG_MPC', False)
 
 LANE_CHANGE_SPEED_MIN = 59 * CV.KPH_TO_MS
 LANE_CHANGE_TIME_MAX = 10.
