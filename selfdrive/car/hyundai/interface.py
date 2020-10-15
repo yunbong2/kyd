@@ -12,7 +12,7 @@ class CarInterface(CarInterfaceBase):
   def __init__(self, CP, CarController, CarState):
     super().__init__(CP, CarController, CarState )
     self.cp2 = self.CS.get_can2_parser(CP)
-    
+
   @staticmethod
   def compute_gb(accel, speed):
     return float(accel) / 3.0
@@ -22,42 +22,44 @@ class CarInterface(CarInterfaceBase):
     ret = CarInterfaceBase.get_std_params(candidate, fingerprint, has_relay)
 
     ret.carName = "hyundai"
-    ret.safetyModel = car.CarParams.SafetyModel.hyundai
+    ret.safetyModel = car.CarParams.SafetyModel.hyundaiCommunity
     ret.radarOffCan = False
 
     # Most Hyundai car ports are community features for now
     ret.communityFeature = False
 
-    tire_stiffness_factor = 1.
-    ret.steerActuatorDelay = 0.2
-    ret.steerRateCost = 0.5
-    ret.steerLimitTimer = 0.8
+    ret.steerActuatorDelay = 0.25
 
     if candidate == CAR.KIA_OPTIMA_H:
       ret.wheelbase = 2.80
       ret.mass = 1595. + STD_CARGO_KG
-      ret.steerRatio = 13.5
+      ret.steerRatio = 14.0
+      tire_stiffness_factor = 0.5
       
       #ret.lateralTuning.pid.kf = 0.00005
       #ret.lateralTuning.pid.kiBP, ret.lateralTuning.pid.kpBP = [[0.], [0.]]
       #ret.lateralTuning.pid.kpV, ret.lateralTuning.pid.kiV = [[0.20], [0.04]]
-      ret.lateralTuning.pid.kpBP = [0., 9., 17., 28.]   #0, 32.4m/s, 61.2m/s 100.8m/s
-      ret.lateralTuning.pid.kpV = [0.16, 0.18, 0.20, 0.22]
-      ret.lateralTuning.pid.kiBP = [0., 9., 17., 28.]
-      ret.lateralTuning.pid.kiV = [0.03, 0.035, 0.04, 0.045]
-      ret.lateralTuning.pid.kfBP = [0., 9., 17., 28.]
-      ret.lateralTuning.pid.kfV = [0.00003, 0.00004, 0.00005, 0.00006]
+      #ret.lateralTuning.pid.kpBP = [0., 9., 17., 28.]   #0, 32.4m/s, 61.2m/s 100.8m/s
+      #ret.lateralTuning.pid.kpV = [0.16, 0.18, 0.20, 0.22]
+      #ret.lateralTuning.pid.kiBP = [0., 9., 17., 28.]
+      #ret.lateralTuning.pid.kiV = [0.03, 0.035, 0.04, 0.045]
+      #ret.lateralTuning.pid.kfBP = [0., 9., 17., 28.]
+      #ret.lateralTuning.pid.kfV = [0.00003, 0.00004, 0.00005, 0.00006]
 
-      
-      #ret.lateralTuning.init('lqr')
-      #ret.lateralTuning.lqr.scale = 1750.0
-      #ret.lateralTuning.lqr.ki = 0.02
-      #ret.lateralTuning.lqr.a = [0., 1., -0.22619643, 1.21822268]
-      #ret.lateralTuning.lqr.b = [-1.92006585e-04, 3.95603032e-05]
-      #ret.lateralTuning.lqr.c = [1., 0.]
-      #ret.lateralTuning.lqr.k = [-100., 450.]
-      #ret.lateralTuning.lqr.l = [0.22, 0.318]
-      #ret.lateralTuning.lqr.dcGain = 0.0025
+      ret.lateralTuning.init('lqr')
+      ret.lateralTuning.lqr.scale = 1500.0
+      ret.lateralTuning.lqr.ki = 0.01
+      ret.lateralTuning.lqr.a = [0., 1., -0.22619643, 1.21822268]
+      ret.lateralTuning.lqr.b = [-1.92006585e-04, 3.95603032e-05]
+      ret.lateralTuning.lqr.c = [1., 0.]
+      ret.lateralTuning.lqr.k = [-110., 451.]
+      ret.lateralTuning.lqr.l = [0.33, 0.318]
+      ret.lateralTuning.lqr.dcGain = 0.0028
+      ret.steerLimitTimer = 2.5
+      ret.steerRateCost = 0.7
+      ret.steerMaxBP = [0.]
+      ret.steerMaxV = [1.5]
+
 
       #ret.lateralTuning.init('indi')
       #ret.lateralTuning.indi.innerLoopGain = 3.0
@@ -65,9 +67,6 @@ class CarInterface(CarInterfaceBase):
       #ret.lateralTuning.indi.timeConstant = 1.0
       #ret.lateralTuning.indi.actuatorEffectiveness = 1.0
 
-    # these cars require a special panda safety mode due to missing counters and checksums in the messages
-    if candidate == CAR.HYUNDAI_GENESIS:
-      ret.safetyModel = car.CarParams.SafetyModel.hyundaiLegacy
 
     ret.centerToFront = ret.wheelbase * 0.4
 
@@ -80,14 +79,37 @@ class CarInterface(CarInterfaceBase):
     ret.tireStiffnessFront, ret.tireStiffnessRear = scale_tire_stiffness(ret.mass, ret.wheelbase, ret.centerToFront,
                                                                          tire_stiffness_factor=tire_stiffness_factor)
 
+    # no rear steering, at least on the listed cars above
+    ret.steerRatioRear = 0.
+    ret.steerControlType = car.CarParams.SteerControlType.torque
+
+    ret.longitudinalTuning.kpBP = [0., 10., 40.]
+    ret.longitudinalTuning.kpV = [1.2, 0.6, 0.2]
+    ret.longitudinalTuning.kiBP = [0., 10., 30., 40.]
+    ret.longitudinalTuning.kiV = [0.05, 0.02, 0.01, 0.005]
+    ret.longitudinalTuning.deadzoneBP = [0., 40]
+    ret.longitudinalTuning.deadzoneV = [0., 0.02]
+
+
+    # steer, gas, brake limitations VS speed
+
+    ret.gasMaxBP = [0., 10., 40.]
+    ret.gasMaxV = [0.5, 0.5, 0.5]
+    ret.brakeMaxBP = [0., 20.]
+    ret.brakeMaxV = [1., 0.8]
+
     ret.enableCamera = is_ecu_disconnected(fingerprint[0], FINGERPRINTS, ECU_FINGERPRINT, candidate, Ecu.fwdCamera) or has_relay
 
 
 
     # ignore CAN2 address if L-CAN on the same BUS
-    ret.mdpsBus = 1 if 593 in fingerprint[1] and 1296 not in fingerprint[1] else 0    # MDPS12
-    ret.sasBus = 1 if 688 in fingerprint[1] and 1296 not in fingerprint[1] else 0     # SAS11
-    ret.sccBus = 0 if 1056 in fingerprint[0] else 1 if 1056 in fingerprint[1] and 1296 not in fingerprint[1] else 2 if 1056 in fingerprint[2] else -1  # SCC11
+    ret.mdpsBus = 1 if 593 in fingerprint[1] and 1296 not in fingerprint[1] else 0
+    ret.sasBus = 1 if 688 in fingerprint[1] and 1296 not in fingerprint[1] else 0
+    ret.sccBus = 0 if 1056 in fingerprint[0] else 1 if 1056 in fingerprint[1] and 1296 not in fingerprint[1] \
+                                                                     else 2 if 1056 in fingerprint[2] else -1
+
+    ret.radarOffCan = ret.sccBus == -1
+    ret.enableCruise = not ret.radarOffCan
     return ret
 
   def update(self, c, can_strings):
@@ -98,11 +120,19 @@ class CarInterface(CarInterfaceBase):
     ret = self.CS.update(self.cp, self.cp2, self.cp_cam)
     ret.canValid = self.cp.can_valid and self.cp2.can_valid and self.cp_cam.can_valid
 
+    if self.CP.enableCruise and not self.CC.scc_live:
+      self.CP.enableCruise = False
+    elif self.CC.scc_live and not self.CP.enableCruise:
+      self.CP.enableCruise = True
+
+    if not self.CC.longcontrol:
+      ret.cruiseState.enabled = ret.cruiseState.available
+
     # TODO: button presses
     buttonEvents = []
     if self.CS.cruise_buttons != self.CS.prev_cruise_buttons:
       be = car.CarState.ButtonEvent.new_message()
-      be.pressed = self.CS.cruise_buttons != 0 
+      be.pressed = self.CS.cruise_buttons != 0
       but = self.CS.cruise_buttons if be.pressed else self.CS.prev_cruise_buttons
       if but == Buttons.RES_ACCEL:
         be.type = ButtonType.accelCruise
@@ -153,13 +183,15 @@ class CarInterface(CarInterfaceBase):
       # do disable on button down
       if b.type == ButtonType.cancel and b.pressed:
         events.add(EventName.buttonCancel)
-      if b.type in [ButtonType.accelCruise, ButtonType.decelCruise] and not b.pressed:
-        events.add(EventName.buttonEnable)
-      if EventName.wrongCarMode in events.events:
-        events.events.remove(EventName.wrongCarMode)
-      if EventName.pcmDisable in events.events:
-        events.events.remove(EventName.pcmDisable)
-      if ret.cruiseState.enabled:
+      if self.CC.longcontrol and not self.CC.scc_live:
+        # do enable on both accel and decel buttons
+        if b.type in [ButtonType.accelCruise, ButtonType.decelCruise] and not b.pressed:
+          events.add(EventName.buttonEnable)
+        if EventName.wrongCarMode in events.events:
+          events.events.remove(EventName.wrongCarMode)
+        if EventName.pcmDisable in events.events:
+          events.events.remove(EventName.pcmDisable)
+      elif not self.CC.longcontrol and ret.cruiseState.enabled:
         # do enable on decel button only
         if b.type == ButtonType.decelCruise and not b.pressed:
           events.add(EventName.buttonEnable)

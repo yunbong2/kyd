@@ -194,9 +194,6 @@ void update_sockets(UIState *s) {
     auto data = sm["radarState"].getRadarState();
     scene.lead_data[0] = data.getLeadOne();
     scene.lead_data[1] = data.getLeadTwo();
-    s->scene.lead_v_rel = scene.lead_data[0].getVRel();
-    s->scene.lead_d_rel = scene.lead_data[0].getDRel();
-    s->scene.lead_status = scene.lead_data[0].getStatus();
   }
   if (sm.updated("liveCalibration")) {
     scene.world_objects_visible = true;
@@ -220,6 +217,7 @@ void update_sockets(UIState *s) {
     scene.thermal = sm["thermal"].getThermal();
     s->scene.cpu0Temp = scene.thermal.getCpu0();
     s->scene.cpuPerc = scene.thermal.getCpuPerc();
+    s->scene.fanSpeed = scene.thermal.getFanSpeed();
     auto data = sm["thermal"].getThermal();
     snprintf(scene.ipAddr, sizeof(scene.ipAddr), "%s", data.getIpAddr().cStr());
   }
@@ -259,8 +257,6 @@ void update_sockets(UIState *s) {
     scene.brakePress = data.getBrakePressed();
     scene.brakeLights = data.getBrakeLights();
     scene.getGearShifter = data.getGearShifter();
-    s->scene.aEgo = data.getAEgo();
-    s->scene.steeringTorqueEps = data.getSteeringTorqueEps();
     scene.leftBlinker = data.getLeftBlinker();
     scene.rightBlinker = data.getRightBlinker();
     scene.leftblindspot = data.getLeftBlindspot();

@@ -126,8 +126,6 @@ typedef struct UIScene {
   bool recording;
   float gpsAccuracyUblox;
   float altitudeUblox;
-  float steeringTorqueEps;
-  float aEgo;
   int cpuPerc;
   bool rightblindspot;
   bool leftblindspot;
@@ -144,8 +142,8 @@ typedef struct UIScene {
   int batteryPercent;
   bool batteryCharging;
   char batteryStatus[64];
-  // ip addr
   char ipAddr[20];
+  int fanSpeed;
 
 
   cereal::HealthData::HwType hwType;

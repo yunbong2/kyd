@@ -2,7 +2,7 @@ bool HKG_forward_BUS1 = false;
 bool HKG_forward_BUS2 = true;
 bool HKG_LCAN_on_BUS1 = false;
 int HKG_MDPS12_checksum = -1;
-int HKG_MDPS12_cnt = 0;   
+int HKG_MDPS12_cnt = 0;
 int HKG_last_StrColT = 0;
 
 int default_rx_hook(CAN_FIFOMailBox_TypeDef *to_push) {
@@ -112,7 +112,7 @@ static int default_fwd_hook(int bus_num, CAN_FIFOMailBox_TypeDef *to_fwd) {
       to_fwd->RDHR |= OutTq << 20;
       HKG_last_StrColT = StrColTq;
       dat[3] = 0;
-      if (!HKG_MDPS12_checksum) { 
+      if (!HKG_MDPS12_checksum) {
         for (int i=0; i<8; i++) {
           New_Chksum2 += dat[i];
         }
@@ -159,6 +159,9 @@ static void alloutput_init(int16_t param) {
   UNUSED(param);
   controls_allowed = true;
   relay_malfunction_reset();
+  if (board_has_obd()) {
+    current_board->set_can_mode(CAN_MODE_OBD_CAN2);
+    }
 }
 
 static int alloutput_tx_hook(CAN_FIFOMailBox_TypeDef *to_send) {

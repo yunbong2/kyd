@@ -146,7 +146,7 @@ static void draw_lead(UIState *s, const cereal::RadarState::LeadData::Reader &le
     }
     fillAlpha = (int)(fmin(fillAlpha, 255));
   }
-  draw_chevron(s, d_rel + 3, lead.getYRel(), 25, nvgRGBA(165, 255, 135, fillAlpha), COLOR_GREEN);
+  draw_chevron(s, d_rel, lead.getYRel(), 25, nvgRGBA(201, 34, 49, fillAlpha), COLOR_YELLOW);
 }
 
 static void ui_draw_lane_line(UIState *s, const model_path_vertices_data *pvd, NVGcolor color) {
@@ -698,6 +698,47 @@ static void bb_ui_draw_measures_left(UIState *s, int bb_x, int bb_y, int bb_w ) 
         value_fontSize, label_fontSize, uom_fontSize );
     bb_ry = bb_y + bb_h;
   }
+  //BAT TEMP
+  if (true) {
+    char val_str[16];
+    char uom_str[6];
+    NVGcolor val_color = nvgRGBA(255, 255, 255, 200);
+    
+    float batteryTemp = scene->thermal.getBat();
+
+    if(batteryTemp > 40.f) {
+      val_color = nvgRGBA(255, 188, 3, 200);
+    }
+    if(batteryTemp > 50.f) {
+      val_color = nvgRGBA(255, 0, 0, 200);
+    }
+    // temp is alway in C * 1000
+    snprintf(val_str, sizeof(val_str), "%.0f°C", batteryTemp);
+    snprintf(uom_str, sizeof(uom_str), "%d", s->scene.fanSpeed);
+    bb_h +=bb_ui_draw_measure(s,  val_str, uom_str, "배터리온도",
+        bb_rx, bb_ry, bb_uom_dx,
+        val_color, lab_color, uom_color,
+        value_fontSize, label_fontSize, uom_fontSize );
+    bb_ry = bb_y + bb_h;
+  }
+
+  //BAT LEVEL
+    if(true) {
+    char val_str[16];
+    char uom_str[6];
+    char bat_lvl[4] = "";
+    NVGcolor val_color = nvgRGBA(255, 255, 255, 200);
+
+    int batteryPercent = scene->thermal.getBatteryPercent();
+
+    snprintf(val_str, sizeof(val_str), "%d%%", batteryPercent);
+    snprintf(uom_str, sizeof(uom_str), "%s", scene->thermal.getBatteryStatus() == "Charging" ? "+" : "-");
+    bb_h +=bb_ui_draw_measure(s,  val_str, uom_str, "배터리레벨",
+        bb_rx, bb_ry, bb_uom_dx,
+        val_color, lab_color, uom_color,
+        value_fontSize, label_fontSize, uom_fontSize );
+    bb_ry = bb_y + bb_h;
+  }
   //add Ublox GPS accuracy
   if (scene->gpsAccuracyUblox != 0.00) {
     char val_str[16];
@@ -739,32 +780,7 @@ static void bb_ui_draw_measures_left(UIState *s, int bb_x, int bb_y, int bb_w ) 
         value_fontSize, label_fontSize, uom_fontSize );
     bb_ry = bb_y + bb_h;
   }
-    //add EPS Motor Torque
-  if (true) {
-    char val_str[16];
-    char uom_str[3];
-    NVGcolor val_color = COLOR_WHITE_ALPHA(200); //TODO: Add orange/red color depending on torque intensity. <1x limit = white, btwn 1x-2x limit = orange, >2x limit = red
-    snprintf(val_str, sizeof(val_str), "%.1f", (s->scene.steeringTorqueEps));
-    snprintf(uom_str, sizeof(uom_str), "Nm");
-    bb_h +=bb_ui_draw_measure(s,  val_str, uom_str, "차량토크",
-        bb_rx, bb_ry, bb_uom_dx,
-        val_color, lab_color, uom_color,
-        value_fontSize, label_fontSize, uom_fontSize );
-    bb_ry = bb_y + bb_h;
-  }
-  //add aEgo
-  if (true) {
-    char val_str[16];
-    char uom_str[6];
-    NVGcolor val_color = COLOR_WHITE_ALPHA(200);
-    snprintf(val_str, sizeof(val_str), "%.1f", (s->scene.aEgo));
-    snprintf(uom_str, sizeof(uom_str), "m/s²");
-    bb_h +=bb_ui_draw_measure(s,  val_str, uom_str, "가속도",
-        bb_rx, bb_ry, bb_uom_dx,
-        val_color, lab_color, uom_color,
-        value_fontSize, label_fontSize, uom_fontSize );
-    bb_ry = bb_y + bb_h;
-  }
+
   //finally draw the frame
   bb_h += 20;
   nvgBeginPath(s->vg);

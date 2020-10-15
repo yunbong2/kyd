@@ -7,7 +7,7 @@ hyundai_checksum = crcmod.mkCrcFun(0x11D, initCrc=0xFD, rev=False, xorOut=0xdf)
 
 def create_lkas11(packer, frame, car_fingerprint, apply_steer, steer_req,
                   lkas11, sys_warning, sys_state, CC, enabled, bus):
-  values = copy.deepcopy( lkas11 )
+  values = copy.copy(lkas11)
   values["CF_Lkas_LdwsSysState"] = 3 if enabled else 1
   values["CF_Lkas_SysWarning"] = 3 if sys_warning else 0
   values["CR_Lkas_StrToqReq"] = apply_steer
@@ -35,7 +35,7 @@ def create_lkas11(packer, frame, car_fingerprint, apply_steer, steer_req,
 
 
 def create_clu11(packer, frame, bus, clu11, button, speed = None):
-  values = copy.deepcopy( clu11 )
+  values = copy.copy(clu11)
   if speed != None:
     values["CF_Clu_Vanz"] = speed
 
@@ -47,6 +47,7 @@ def create_clu11(packer, frame, bus, clu11, button, speed = None):
 def create_lfa_mfa(packer, frame, enabled):
   values = {
     "ACTIVE": enabled,
+    "HDA_USM": 2,
   }
 
   # ACTIVE 1 = Green steering wheel icon
@@ -65,8 +66,7 @@ def create_lfa_mfa(packer, frame, enabled):
 
   
 def create_mdps12(packer, frame, mdps12):
-  values = copy.deepcopy( mdps12 )
-  #values = mdps12
+  values = copy.copy(mdps12)
   values["CF_Mdps_ToiActive"] = 0
   values["CF_Mdps_ToiUnavail"] = 1
   values["CF_Mdps_MsgCount2"] = frame % 0x100
