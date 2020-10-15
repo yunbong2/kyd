@@ -142,19 +142,19 @@ static int hyundai_rx_hook(CAN_FIFOMailBox_TypeDef *to_push) {
     }
 
     // enter controls on rising edge of ACC, exit controls on ACC off
-    //if (addr == 1057) { // for cars with long control
-    //  hyundai_has_scc = true;
-    //  car_SCC_live = 50;
-    //  // 2 bits: 13-14
-    //  int cruise_engaged = (GET_BYTES_04(to_push) >> 13) & 0x3;
-    //  if (cruise_engaged && !cruise_engaged_prev) {
-    //    controls_allowed = 1;
-    //  }
-    //  if (!cruise_engaged) {
-    //    controls_allowed = 0;
-    //  }
-    //  cruise_engaged_prev = cruise_engaged;
-    //}
+    if (addr == 1057) { // for cars with long control
+      hyundai_has_scc = true;
+      car_SCC_live = 50;
+      // 2 bits: 13-14
+      int cruise_engaged = (GET_BYTES_04(to_push) >> 13) & 0x3;
+      if (cruise_engaged && !cruise_engaged_prev) {
+        controls_allowed = 1;
+      }
+      if (!cruise_engaged) {
+        controls_allowed = 0;
+      }
+      cruise_engaged_prev = cruise_engaged;
+    }
     if (addr == 1056) { // for cars without long control
       // 2 bits: 13-14
       int cruise_engaged = GET_BYTES_04(to_push) & 0x1; // ACC main_on signal

@@ -35,8 +35,8 @@ const mat3 intrinsic_matrix = (mat3){{
 const uint8_t alert_colors[][4] = {
   [STATUS_OFFROAD] = {0x07, 0x23, 0x39, 0xf1},
   [STATUS_DISENGAGED] = {0x17, 0x33, 0x49, 0xc8},
-  [STATUS_ENGAGED] = {0x17, 0x86, 0x44, 0xf1},
-  [STATUS_WARNING] = {0xDA, 0x6F, 0x25, 0xf1},
+  [STATUS_ENGAGED] = {0x17, 0x86, 0x44, 0x01},
+  [STATUS_WARNING] = {0xDA, 0x6F, 0x25, 0x01},
   [STATUS_ALERT] = {0xC9, 0x22, 0x31, 0xf1},
 };
 
@@ -146,7 +146,7 @@ static void draw_lead(UIState *s, const cereal::RadarState::LeadData::Reader &le
     }
     fillAlpha = (int)(fmin(fillAlpha, 255));
   }
-  draw_chevron(s, d_rel, lead.getYRel(), 25, nvgRGBA(201, 34, 49, fillAlpha), COLOR_YELLOW);
+  draw_chevron(s, d_rel + 3, lead.getYRel(), 25, nvgRGBA(165, 255, 135, fillAlpha), COLOR_GREEN);
 }
 
 static void ui_draw_lane_line(UIState *s, const model_path_vertices_data *pvd, NVGcolor color) {
@@ -423,6 +423,16 @@ static void ui_draw_vision_maxspeed(UIState *s) {
   }
 }
 
+static void ui_draw_debug(UIState *s) 
+{
+  UIScene &scene = s->scene;
+  nvgTextAlign(s->vg, NVG_ALIGN_LEFT | NVG_ALIGN_BASELINE);
+  nvgFontSize(s->vg, 36*1.5*0.8);
+
+  ui_print( s, 0, 1020, "%s", scene.alert.text1 );
+  ui_print( s, 0, 1078, "%s", scene.alert.text2 );
+}
+
 /*
   park @1;
   drive @2;
@@ -503,7 +513,8 @@ static void ui_draw_vision_speed(UIState *s) {
 
   snprintf(speed_str, sizeof(speed_str), "%d", (int)speed);
   ui_draw_text(s->vg, viz_rect.centerX(), 240, speed_str, 96*2.5, val_color, s->font_sans_bold);
-  ui_draw_text(s->vg, viz_rect.centerX(), 320, s->is_metric?"km/h":"mph", 36*2.5, COLOR_WHITE_ALPHA(200), s->font_sans_regular); 
+  ui_draw_text(s->vg, viz_rect.centerX(), 320, s->is_metric?"km/h":"mph", 36*2.5, COLOR_WHITE_ALPHA(200), s->font_sans_regular);
+  ui_draw_debug( s );  
 }
 
 static void ui_draw_vision_event(UIState *s) {
