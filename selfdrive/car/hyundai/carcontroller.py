@@ -215,7 +215,7 @@ class CarController():
       trace1.printf2( '{}'.format( str_log2 ) )
 
 
-    if pcm_cancel_cmd and self.longcontrol::
+    if pcm_cancel_cmd and self.longcontrol:
       can_sends.append(create_clu11(self.packer, frame, CS.scc_bus, CS.clu11, Buttons.CANCEL, clu11_speed))
     elif CS.out.cruiseState.standstill:
       # run only first time when the car stopped
