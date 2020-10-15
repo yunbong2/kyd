@@ -1,17 +1,25 @@
 #!/usr/bin/env python3
 from cereal import car
 from selfdrive.config import Conversions as CV
-from selfdrive.car.hyundai.values import Ecu, ECU_FINGERPRINT, CAR, FINGERPRINTS, Buttons
+from selfdrive.car.hyundai.values import Ecu, ECU_FINGERPRINT, CAR, FINGERPRINTS, Buttons, FEATURES
 from selfdrive.car import STD_CARGO_KG, scale_rot_inertia, scale_tire_stiffness, is_ecu_disconnected, gen_empty_fingerprint
-from selfdrive.car.interfaces import CarInterfaceBase, MAX_CTRL_SPEED
+from selfdrive.car.interfaces import CarInterfaceBase
+from selfdrive.controls.lib.pathplanner import LANE_CHANGE_SPEED_MIN
+from common.params import Params
 
+GearShifter = car.CarState.GearShifter
 EventName = car.CarEvent.EventName
 ButtonType = car.CarState.ButtonEvent.Type
 
 class CarInterface(CarInterfaceBase):
   def __init__(self, CP, CarController, CarState):
-    super().__init__(CP, CarController, CarState )
+    super().__init__(CP, CarController, CarState)
     self.cp2 = self.CS.get_can2_parser(CP)
+    self.mad_mode_enabled = True
+    self.lkas_button_alert = False
+
+    self.blinker_status = 0
+    self.blinker_timer = 0
 
   @staticmethod
   def compute_gb(accel, speed):
@@ -22,13 +30,15 @@ class CarInterface(CarInterfaceBase):
     ret = CarInterfaceBase.get_std_params(candidate, fingerprint, has_relay)
 
     ret.carName = "hyundai"
-    ret.safetyModel = car.CarParams.SafetyModel.hyundaiCommunity
-    ret.radarOffCan = False
+    ret.safetyModel = car.CarParams.SafetyModel.hyundaiLegacy
+    if candidate in [CAR.SONATA]:
+      ret.safetyModel = car.CarParams.SafetyModel.hyundai
 
     # Most Hyundai car ports are community features for now
     ret.communityFeature = False
 
     ret.steerActuatorDelay = 0.25
+
 
     if candidate == CAR.KIA_OPTIMA_H:
       ret.wheelbase = 2.80
@@ -100,16 +110,22 @@ class CarInterface(CarInterfaceBase):
 
     ret.enableCamera = is_ecu_disconnected(fingerprint[0], FINGERPRINTS, ECU_FINGERPRINT, candidate, Ecu.fwdCamera) or has_relay
 
-
+    ret.stoppingControl = True
+    ret.startAccel = 0.0
 
     # ignore CAN2 address if L-CAN on the same BUS
     ret.mdpsBus = 1 if 593 in fingerprint[1] and 1296 not in fingerprint[1] else 0
     ret.sasBus = 1 if 688 in fingerprint[1] and 1296 not in fingerprint[1] else 0
     ret.sccBus = 0 if 1056 in fingerprint[0] else 1 if 1056 in fingerprint[1] and 1296 not in fingerprint[1] \
                                                                      else 2 if 1056 in fingerprint[2] else -1
-
     ret.radarOffCan = ret.sccBus == -1
+    ret.openpilotLongitudinalControl = False
     ret.enableCruise = not ret.radarOffCan
+    ret.spasEnabled = False
+    
+    # set safety_hyundai_community only for non-SCC, MDPS harrness or SCC harrness cars or cars that have unknown issue
+    if ret.radarOffCan or ret.mdpsBus == 1 or ret.openpilotLongitudinalControl or ret.sccBus == 1:
+      ret.safetyModel = car.CarParams.SafetyModel.hyundaiCommunity
     return ret
 
   def update(self, c, can_strings):
@@ -125,10 +141,17 @@ class CarInterface(CarInterfaceBase):
     elif self.CC.scc_live and not self.CP.enableCruise:
       self.CP.enableCruise = True
 
-    if not self.CC.longcontrol:
+    # most HKG cars has no long control, it is safer and easier to engage by main on
+    if self.mad_mode_enabled and not self.CC.longcontrol:
       ret.cruiseState.enabled = ret.cruiseState.available
 
-    # TODO: button presses
+
+    # low speed steer alert hysteresis logic (only for cars with steer cut off above 10 m/s)
+    if ret.vEgo < (self.CP.minSteerSpeed + 0.2) and self.CP.minSteerSpeed > 10.:
+      self.low_speed_alert = True
+    if ret.vEgo > (self.CP.minSteerSpeed + 0.7):
+      self.low_speed_alert = False
+
     buttonEvents = []
     if self.CS.cruise_buttons != self.CS.prev_cruise_buttons:
       be = car.CarState.ButtonEvent.new_message()
@@ -154,29 +177,20 @@ class CarInterface(CarInterfaceBase):
 
     events = self.create_common_events(ret)
 
+    if self.CC.longcontrol and self.CS.cruise_unavail:
+      events.add(EventName.brakeUnavailable)
+    #if abs(ret.steeringAngle) > 90. and EventName.steerTempUnavailable not in events.events:
+    #  events.add(EventName.steerTempUnavailable)
+    if self.low_speed_alert and not self.CS.mdps_bus:
+      events.add(EventName.belowSteerSpeed)
+    if self.mad_mode_enabled and not self.CC.longcontrol and EventName.pedalPressed in events.events:
+      events.events.remove(EventName.pedalPressed)
     if self.CC.lanechange_manual_timer:
       events.add(EventName.laneChangeManual)
     if self.CC.emergency_manual_timer:
       events.add(EventName.emgButtonManual)
     if self.CC.driver_steering_torque_above_timer:
       events.add(EventName.driverSteering)
-
-    if self.CC.mode_change_timer and self.CS.out.cruiseState.modeSel == 0:
-      events.add(EventName.modeChangeOpenpilot)
-    elif self.CC.mode_change_timer and self.CS.out.cruiseState.modeSel == 1:
-      events.add(EventName.modeChangeDistcurv)
-    elif self.CC.mode_change_timer and self.CS.out.cruiseState.modeSel == 2:
-      events.add(EventName.modeChangeDistance)
-    elif self.CC.mode_change_timer and self.CS.out.cruiseState.modeSel == 3:
-      events.add(EventName.modeChangeTrafficjam)
-
-    # low speed steer alert hysteresis logic (only for cars with steer cut off above 10 m/s)
-    if ret.vEgo < (self.CP.minSteerSpeed + 2.) and self.CP.minSteerSpeed > 10.:
-      self.low_speed_alert = True
-    if ret.vEgo > (self.CP.minSteerSpeed + 4.):
-      self.low_speed_alert = False
-    if self.low_speed_alert:
-      events.add(car.CarEvent.EventName.belowSteerSpeed)
 
   # handle button presses
     for b in ret.buttonEvents:
@@ -201,8 +215,10 @@ class CarInterface(CarInterfaceBase):
     self.CS.out = ret.as_reader()
     return self.CS.out
 
-  def apply(self, c, sm, CP ):
-    can_sends = self.CC.update(c, self.CS, self.frame, sm, CP )
-
+  def apply(self, c):
+    can_sends = self.CC.update(c.enabled, self.CS, self.frame, c, c.actuators,
+                               c.cruiseControl.cancel, c.hudControl.visualAlert, c.hudControl.leftLaneVisible,
+                               c.hudControl.rightLaneVisible, c.hudControl.leftLaneDepart, c.hudControl.rightLaneDepart,
+                               c.hudControl.setSpeed, c.hudControl.leadVisible)
     self.frame += 1
     return can_sends
