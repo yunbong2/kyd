@@ -147,6 +147,16 @@ class CarController():
         if self.resume_cnt > 5:
           self.last_resume_frame = frame
           self.resume_cnt = 0
+
+      elif self.cruise_gap_prev == 0: 
+        self.cruise_gap_prev = CS.cruiseGapSet
+        self.cruise_gap_set_init = 1
+      elif CS.cruiseGapSet != 1.0:
+        self.cruise_gap_switch_timer += 1
+        if self.cruise_gap_switch_timer > 200:
+          can_sends.append(create_clu11(self.packer, frame, CS.scc_bus, CS.clu11, Buttons.GAP_DIST, clu11_speed))
+          self.cruise_gap_switch_timer = 0
+
     # reset lead distnce after the car starts moving
     elif self.last_lead_distance != 0:
       self.last_lead_distance = 0

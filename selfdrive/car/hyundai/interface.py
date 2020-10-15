@@ -131,6 +131,15 @@ class CarInterface(CarInterfaceBase):
     if self.CC.driver_steering_torque_above_timer:
       events.add(EventName.driverSteering)
 
+    if self.CC.mode_change_timer and self.CS.out.cruiseState.modeSel == 0:
+      events.add(EventName.modeChangeOpenpilot)
+    elif self.CC.mode_change_timer and self.CS.out.cruiseState.modeSel == 1:
+      events.add(EventName.modeChangeDistcurv)
+    elif self.CC.mode_change_timer and self.CS.out.cruiseState.modeSel == 2:
+      events.add(EventName.modeChangeDistance)
+    elif self.CC.mode_change_timer and self.CS.out.cruiseState.modeSel == 3:
+      events.add(EventName.modeChangeTrafficjam)
+
     # low speed steer alert hysteresis logic (only for cars with steer cut off above 10 m/s)
     if ret.vEgo < (self.CP.minSteerSpeed + 2.) and self.CP.minSteerSpeed > 10.:
       self.low_speed_alert = True
