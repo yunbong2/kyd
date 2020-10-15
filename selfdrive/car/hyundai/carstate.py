@@ -16,16 +16,17 @@ class CarState(CarStateBase):
     self.mdps_bus = CP.mdpsBus
     self.sas_bus = CP.sasBus
     self.scc_bus = CP.sccBus
-    self.leftBlinker = False
-    self.rightBlinker = False
     self.lkas_button_on = True
     self.has_scc13 = CP.carFingerprint in FEATURES["has_scc13"]
     self.has_scc14 = CP.carFingerprint in FEATURES["has_scc14"]
     self.cruise_main_button = 0
     self.mdps_error_cnt = 0
     self.spas_enabled = CP.spasEnabled
+    # blinker
     self.left_blinker_flash = 0
-    self.right_blinker_flash = 0 
+    self.right_blinker_flash = 0  
+    self.TSigLHSw = 0
+    self.TSigRHSw = 0
 
     self.apply_steer = 0.
 
@@ -36,8 +37,6 @@ class CarState(CarStateBase):
 
     self.prev_cruise_buttons = self.cruise_buttons
     self.prev_cruise_main_button = self.cruise_main_button
-    self.prev_left_blinker = self.leftBlinker
-    self.prev_right_blinker = self.rightBlinker
     self.prev_lkas_button_on = self.lkas_button_on
 
     ret = car.CarState.new_message()
@@ -67,25 +66,7 @@ class CarState(CarStateBase):
     self.mdps_error_cnt += 1 if cp_mdps.vl["MDPS12"]['CF_Mdps_ToiUnavail'] != 0 else -self.mdps_error_cnt
     ret.steerWarning = self.mdps_error_cnt > 100 #cp_mdps.vl["MDPS12"]['CF_Mdps_ToiUnavail'] != 0
 
-    #ret.leftBlinker = cp.vl["CGW1"]['CF_Gway_TSigLHSw'] != 0
-    #ret.rightBlinker = cp.vl["CGW1"]['CF_Gway_TSigRHSw'] != 0
-    leftBlinker = cp.vl["CGW1"]['CF_Gway_TurnSigLh'] != 0
-    rightBlinker = cp.vl["CGW1"]['CF_Gway_TurnSigRh'] != 0
-    if leftBlinker and not rightBlinker:
-      self.left_blinker_flash = 100
-      self.right_blinker_flash = 0
-    elif rightBlinker and not leftBlinker:
-      self.right_blinker_flash = 100
-      self.left_blinker_flash = 0
-    elif leftBlinker and rightBlinker:
-      self.left_blinker_flash = 100
-      self.right_blinker_flash = 100
-    if self.left_blinker_flash:
-      self.left_blinker_flash -= 1
-    if self.right_blinker_flash:
-      self.right_blinker_flash -= 1
-    leftBlinker = self.left_blinker_flash != 0
-    rightBlinker = self.right_blinker_flash != 0
+    ret.leftBlinker, ret.rightBlinker = self.update_blinker(cp)
 
     # cruise state
     ret.cruiseState.enabled = (cp_scc.vl["SCC12"]['ACCMode'] != 0) if not self.no_radar else \
@@ -212,6 +193,31 @@ class CarState(CarStateBase):
       self.mdps11_stat = cp_mdps.vl["MDPS11"]["CF_Mdps_Stat"]
 
     return ret
+
+  def update_blinker(self, cp):
+    self.TSigLHSw = cp.vl["CGW1"]['CF_Gway_TSigLHSw']
+    self.TSigRHSw = cp.vl["CGW1"]['CF_Gway_TSigRHSw']
+    leftBlinker = cp.vl["CGW1"]['CF_Gway_TurnSigLh'] != 0
+    rightBlinker = cp.vl["CGW1"]['CF_Gway_TurnSigRh'] != 0
+
+    if leftBlinker and not rightBlinker:
+      self.left_blinker_flash = 140
+      self.right_blinker_flash = 0
+    elif rightBlinker and not leftBlinker:
+      self.right_blinker_flash = 140
+      self.left_blinker_flash = 0
+    elif leftBlinker and rightBlinker:
+      self.left_blinker_flash = 140
+      self.right_blinker_flash = 140
+
+    if  self.left_blinker_flash:
+      self.left_blinker_flash -= 1
+    if  self.right_blinker_flash:
+      self.right_blinker_flash -= 1
+
+    leftBlinker = self.left_blinker_flash != 0
+    rightBlinker = self.right_blinker_flash != 0
+    return  leftBlinker, rightBlinker
 
   @staticmethod
   def get_can_parser(CP):
