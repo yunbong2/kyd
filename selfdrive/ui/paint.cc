@@ -714,7 +714,7 @@ static void bb_ui_draw_measures_left(UIState *s, int bb_x, int bb_y, int bb_w ) 
     }
     // temp is alway in C * 1000
     snprintf(val_str, sizeof(val_str), "%.0f°C", batteryTemp);
-    snprintf(uom_str, sizeof(uom_str), "%d", s->scene.fanSpeed);
+    snprintf(uom_str, sizeof(uom_str), "%d", (s->scene.fanSpeed)/1000);
     bb_h +=bb_ui_draw_measure(s,  val_str, uom_str, "배터리온도",
         bb_rx, bb_ry, bb_uom_dx,
         val_color, lab_color, uom_color,
@@ -732,7 +732,7 @@ static void bb_ui_draw_measures_left(UIState *s, int bb_x, int bb_y, int bb_w ) 
     int batteryPercent = scene->thermal.getBatteryPercent();
 
     snprintf(val_str, sizeof(val_str), "%d%%", batteryPercent);
-    snprintf(uom_str, sizeof(uom_str), "%s", scene->thermal.getBatteryStatus() == "Charging" ? "+" : "-");
+    snprintf(uom_str, sizeof(uom_str), "%s", scene->thermal.getBatteryStatus() == "Charging" ? "++" : "--");
     bb_h +=bb_ui_draw_measure(s,  val_str, uom_str, "배터리레벨",
         bb_rx, bb_ry, bb_uom_dx,
         val_color, lab_color, uom_color,
