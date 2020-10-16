@@ -981,6 +981,7 @@ static void bb_ui_draw_UI(UIState *s)
 //BB END: functions added for the display of various items
 
 static void ui_draw_vision_footer(UIState *s) {
+  const UIScene *scene = &s->scene;
   nvgBeginPath(s->vg);
   nvgRect(s->vg, scene->viz_rect.x, s->scene.viz_rect.bottom(), scene->viz_rect.w, footer_h);
   ui_draw_vision_face(s);
