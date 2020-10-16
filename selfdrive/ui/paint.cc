@@ -35,8 +35,8 @@ const mat3 intrinsic_matrix = (mat3){{
 const uint8_t alert_colors[][4] = {
   [STATUS_OFFROAD] = {0x07, 0x23, 0x39, 0xf1},
   [STATUS_DISENGAGED] = {0x17, 0x33, 0x49, 0xc8},
-  [STATUS_ENGAGED] = {0x17, 0x86, 0x44, 0x01},
-  [STATUS_WARNING] = {0xDA, 0x6F, 0x25, 0x01},
+  [STATUS_ENGAGED] = {0x17, 0x86, 0x44, 0xf1},
+  [STATUS_WARNING] = {0xDA, 0x6F, 0x25, 0xf1},
   [STATUS_ALERT] = {0xC9, 0x22, 0x31, 0xf1},
 };
 
@@ -117,14 +117,24 @@ static void draw_chevron(UIState *s, float x_in, float y_in, float sz,
   nvgFill(s->vg);
 }
 
-static void ui_draw_circle_image(NVGcontext *vg, float x, float y, int size, int image, NVGcolor color, float img_alpha, int img_y = 0) {
+static void ui_draw_circle_image(NVGcontext *vg, float x, float y, int size, int image, NVGcolor color, float img_alpha, float angleSteers = 0 ) {
+  float img_rotation =  angleSteers/180*3.141592;
+  int ct_pos = -size * 0.75;
   const int img_size = size * 1.5;
   nvgBeginPath(vg);
   nvgCircle(vg, x, y + (bdr_s * 1.5), size);
   nvgFillColor(vg, color);
   nvgFill(vg);
-  ui_draw_image(vg, x - (img_size / 2), img_y ? img_y : y - (size / 4), img_size, img_size, image, img_alpha);
+
+  nvgSave( vg );
+  nvgTranslate(vg,x,(y + (bdr_s*1.5)));
+  nvgRotate(vg,-img_rotation);
+
+  ui_draw_image(vg, ct_pos, ct_pos, img_size, img_size, image, img_alpha);
+
+  nvgRestore(vg);  
 }
+
 
 static void ui_draw_circle_image(NVGcontext *vg, float x, float y, int size, int image, bool active) {
   float bg_alpha = active ? 0.3f : 0.1f;
@@ -242,6 +252,24 @@ static void ui_draw_track(UIState *s, bool is_mpc, track_vertices_data *pvd) {
 
   NVGpaint track_bg;
   if (is_mpc) {
+    // Draw colored MPC track Kegman's
+    if (s->scene.steerOverride) {
+      track_bg = nvgLinearGradient(s->vg, s->fb_w, s->fb_h, s->fb_w, s->fb_h*.4,
+        nvgRGBA(0, 191, 255, 255), nvgRGBA(0, 95, 128, 50));
+    } else {
+      int torque_scale = (int)fabs(510*(float)s->scene.output_scale);
+      int red_lvl = fmin(255, torque_scale);
+      int green_lvl = fmin(255, 510-torque_scale);
+      track_bg = nvgLinearGradient(s->vg, s->fb_w, s->fb_h, s->fb_w, s->fb_h*.4,
+        nvgRGBA(          red_lvl,            green_lvl,  0, 255),
+        nvgRGBA((int)(0.5*red_lvl), (int)(0.5*green_lvl), 0, 50));
+    }
+  } else {
+    // Draw white vision track
+    track_bg = nvgLinearGradient(s->vg, s->fb_w, s->fb_h, s->fb_w, s->fb_h*.4,
+      nvgRGBA(255, 255, 255, 200), nvgRGBA(255, 255, 255, 50));
+  }
+/*
     // Draw colored MPC track
     const Color clr = bg_colors[s->status];
     track_bg = nvgLinearGradient(s->vg, s->fb_w, s->fb_h, s->fb_w, s->fb_h*.4,
@@ -251,6 +279,7 @@ static void ui_draw_track(UIState *s, bool is_mpc, track_vertices_data *pvd) {
     track_bg = nvgLinearGradient(s->vg, s->fb_w, s->fb_h, s->fb_w, s->fb_h*.4,
       COLOR_WHITE, COLOR_WHITE_ALPHA(0));
   }
+*/
   nvgFillPaint(s->vg, track_bg);
   nvgFill(s->vg);
 }
@@ -380,7 +409,7 @@ static void ui_draw_world(UIState *s) {
   if (scene->lead_data[0].getStatus()) {
     draw_lead(s, scene->lead_data[0]);
   }
-  if (scene->lead_data[1].getStatus() && (std::abs(scene->lead_data[0].getDRel() - scene->lead_data[1].getDRel()) > 1.0)) {
+  if (scene->lead_data[1].getStatus() && (std::abs(scene->lead_data[0].getDRel() - scene->lead_data[1].getDRel()) > 3.0)) {
     draw_lead(s, scene->lead_data[1]);
   }
   nvgRestore(s->vg);
@@ -523,52 +552,39 @@ static void ui_draw_vision_event(UIState *s) {
   const int viz_event_y = s->scene.viz_rect.y + (bdr_s*1.5);
   if (s->scene.controls_state.getDecelForModel() && s->scene.controls_state.getEnabled()) {
     // draw winding road sign
-    const int img_turn_size = 160*1.5;
+    const int img_turn_size = 160*1.5*0.82;
     ui_draw_image(s->vg, viz_event_x - (img_turn_size / 4), viz_event_y + bdr_s - 25, img_turn_size, img_turn_size, s->img_turn, 1.0f);
   } else {
     // draw steering wheel
-    const int bg_wheel_size = 96;
+    const int bg_wheel_size = 90;
     const int bg_wheel_x = viz_event_x + (viz_event_w-bg_wheel_size);
     const int bg_wheel_y = viz_event_y + (bg_wheel_size/2);
-    const int img_wheel_size = bg_wheel_size*1.5;
-    const int img_wheel_x = bg_wheel_x-(img_wheel_size/2);
-    const int img_wheel_y = bg_wheel_y-25;
-    const float img_rotation = s->scene.angleSteers/180*3.141592;
-    float img_wheel_alpha = 0.1f;
-    bool is_engaged = (s->status == STATUS_ENGAGED);
-    bool is_warning = (s->status == STATUS_WARNING);
-
-    if (is_engaged || is_warning) {
-      nvgBeginPath(s->vg);
-      nvgCircle(s->vg, bg_wheel_x, (bg_wheel_y + (bdr_s*1.5)), bg_wheel_size);
-      if (is_engaged) {
-        nvgFillColor(s->vg, nvgRGBA(23, 134, 68, 255));
-      } else if (is_warning) {
-        nvgFillColor(s->vg, COLOR_OCHRE);
-      }
-      nvgFill(s->vg);
-      img_wheel_alpha = 1.0f;
-      nvgSave(s->vg);
-      nvgTranslate(s->vg,bg_wheel_x,(bg_wheel_y + (bdr_s*1.5)));
-      nvgRotate(s->vg,-img_rotation);
-      nvgBeginPath(s->vg);
-      NVGpaint imgPaint = nvgImagePattern(s->vg, img_wheel_x-bg_wheel_x, img_wheel_y-(bg_wheel_y + (bdr_s*1.5)),
-	  img_wheel_size, img_wheel_size, 0, s->img_wheel, img_wheel_alpha);
-      nvgRect(s->vg, img_wheel_x-bg_wheel_x, img_wheel_y-(bg_wheel_y + (bdr_s*1.5)), img_wheel_size, img_wheel_size);
-      nvgFillPaint(s->vg, imgPaint);
-      nvgFill(s->vg);
-      nvgRestore(s->vg);
+    NVGcolor color = COLOR_BLACK_ALPHA(0);
+    if (s->status == STATUS_ENGAGED) {
+      color = nvgRGBA(23, 134, 68, 255);
+    } else if (s->status == STATUS_WARNING) {
+      color = COLOR_OCHRE;
     } else {
+      color = nvgRGBA(23, 51, 73, 255);
+    }
+
+    //if (s->scene.controls_state.getEngageable()){
+    if (s->scene.controls_state.getEnabled()){
+      float angleSteers = s->scene.controls_state.getAngleSteers();
+      ui_draw_circle_image(s->vg, bg_wheel_x, bg_wheel_y, bg_wheel_size, s->img_wheel, color, 1.0f, angleSteers );// bg_wheel_y - 25);
+    }
+    else  
+    {
       ui_draw_gear( s );
     }
   }
 }
 
 static void ui_draw_vision_face(UIState *s) {
-  const int face_size = 96;
+  const int face_size = 85;
   const int face_x = (s->scene.viz_rect.x + face_size + (bdr_s * 2));
   const int face_y = (s->scene.viz_rect.bottom() - footer_h + ((footer_h - face_size) / 2));
-  ui_draw_circle_image(s->vg, face_x, face_y, face_size, s->img_face, s->scene.dmonitoring_state.getFaceDetected());
+  ui_draw_circle_image(s->vg, face_x, face_y, face_size-5, s->img_face, s->scene.dmonitoring_state.getFaceDetected());
 }
 
 static void ui_draw_driver_view(UIState *s) {
@@ -621,7 +637,7 @@ static void ui_draw_driver_view(UIState *s) {
   const int face_size = 85;
   const int x = (valid_frame_x + face_size + (bdr_s * 2)) + (scene->is_rhd ? valid_frame_w - box_h / 2:0);
   const int y = (box_y + box_h - face_size - bdr_s - (bdr_s * 1.5));
-  ui_draw_circle_image(s->vg, x, y, face_size, s->img_face, scene->dmonitoring_state.getFaceDetected());
+  ui_draw_circle_image(s->vg, x, y, face_size-5, s->img_face, scene->dmonitoring_state.getFaceDetected());
 }
 
 static void ui_draw_vision_header(UIState *s) {
@@ -702,7 +718,7 @@ static void bb_ui_draw_measures_left(UIState *s, int bb_x, int bb_y, int bb_w ) 
   if (true) {
     char val_str[16];
     char uom_str[6];
-    NVGcolor val_color = nvgRGBA(255, 255, 255, 200);
+    NVGcolor val_color = COLOR_WHITE_ALPHA(200);
     
     float batteryTemp = scene->thermal.getBat();
 
@@ -727,7 +743,7 @@ static void bb_ui_draw_measures_left(UIState *s, int bb_x, int bb_y, int bb_w ) 
     char val_str[16];
     char uom_str[6];
     char bat_lvl[4] = "";
-    NVGcolor val_color = nvgRGBA(255, 255, 255, 200);
+    NVGcolor val_color = COLOR_WHITE_ALPHA(200);
 
     int batteryPercent = scene->thermal.getBatteryPercent();
 
@@ -965,6 +981,8 @@ static void bb_ui_draw_UI(UIState *s)
 //BB END: functions added for the display of various items
 
 static void ui_draw_vision_footer(UIState *s) {
+  nvgBeginPath(s->vg);
+  nvgRect(s->vg, scene->viz_rect.x, s->scene.viz_rect.bottom(), scene->viz_rect.w, footer_h);
   ui_draw_vision_face(s);
   bb_ui_draw_UI(s);
 }
