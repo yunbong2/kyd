@@ -43,7 +43,7 @@ class CarInterface(CarInterfaceBase):
     if candidate == CAR.OPTIMA_HEV:
       ret.wheelbase = 2.80
       ret.mass = 1595. + STD_CARGO_KG
-      ret.steerRatio = 14.0
+      ret.steerRatio = 13.5
       tire_stiffness_factor = 0.5
       
       #ret.lateralTuning.pid.kf = 0.00005
@@ -64,9 +64,9 @@ class CarInterface(CarInterfaceBase):
       ret.lateralTuning.lqr.c = [1., 0.]
       ret.lateralTuning.lqr.k = [-110., 451.]
       ret.lateralTuning.lqr.l = [0.33, 0.318]
-      ret.lateralTuning.lqr.dcGain = 0.0028
+      ret.lateralTuning.lqr.dcGain = 0.0027
       ret.steerLimitTimer = 2.5
-      ret.steerRateCost = 0.7
+      ret.steerRateCost = 0.55
       ret.steerMaxBP = [0.]
       ret.steerMaxV = [1.5]
 
@@ -118,7 +118,7 @@ class CarInterface(CarInterfaceBase):
     ret.sasBus = 1 if 688 in fingerprint[1] and 1296 not in fingerprint[1] else 0
     ret.sccBus = 0 if 1056 in fingerprint[0] else 1 if 1056 in fingerprint[1] and 1296 not in fingerprint[1] \
                                                                      else 2 if 1056 in fingerprint[2] else -1
-    ret.radarOffCan = False
+    ret.radarOffCan = ret.sccBus == -1
     ret.openpilotLongitudinalControl = False
     ret.enableCruise = not ret.radarOffCan
     ret.spasEnabled = False
