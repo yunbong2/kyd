@@ -103,7 +103,10 @@ class CarController():
     apply_accel = clip(apply_accel * ACCEL_SCALE, ACCEL_MIN, ACCEL_MAX)
 
     # Steering Torque
-    new_steer = actuators.steer * SteerLimitParams.STEER_MAX
+    if self.driver_steering_torque_above_timer:
+      new_steer = actuators.steer * SteerLimitParams.STEER_MAX * (self.driver_steering_torque_above_timer / 100)
+    else:
+      new_steer = actuators.steer * SteerLimitParams.STEER_MAX
     apply_steer = apply_std_steer_torque_limits(new_steer, self.apply_steer_last, CS.out.steeringTorque, SteerLimitParams)
     self.steer_rate_limited = new_steer != apply_steer
 
@@ -125,7 +128,8 @@ class CarController():
 
     # disable if steer angle reach 90 deg, otherwise mdps fault in some models
     # temporarily disable steering when LKAS button off 
-    lkas_active = enabled and abs(CS.out.steeringAngle) < 90. and not spas_active
+    #lkas_active = enabled and abs(CS.out.steeringAngle) < 90. and not spas_active
+    lkas_active = enabled and not spas_active
 
     # fix for Genesis hard fault at low speed
     if CS.out.vEgo < 60 * CV.KPH_TO_MS and self.car_fingerprint == CAR.GENESIS and not CS.mdps_bus:
@@ -136,8 +140,8 @@ class CarController():
     if CS.out.leftBlinker and CS.out.rightBlinker:
       self.emergency_manual_timer = 10
     if abs(CS.out.steeringTorque) > 200:
-      self.driver_steering_torque_above_timer = 15
-    if self.lanechange_manual_timer or self.driver_steering_torque_above_timer:
+      self.driver_steering_torque_above_timer = 100
+    if self.lanechange_manual_timer:
       lkas_active = 0
     if self.lanechange_manual_timer > 0:
       self.lanechange_manual_timer -= 1
