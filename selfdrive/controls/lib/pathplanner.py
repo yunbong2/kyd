@@ -89,6 +89,9 @@ class PathPlanner():
     angle_steers = sm['carState'].steeringAngle
     active = sm['controlsState'].active
 
+    velocity_curvature = sm['controlsState'].vCurvature
+    saturated_steering = sm['controlsState'].steerSaturated
+
     angle_offset = sm['liveParameters'].angleOffset
 
     # Run MPC
