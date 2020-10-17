@@ -24,7 +24,7 @@ int write_param_float(float param, const char* param_name, bool persistent_param
 
 void ui_init(UIState *s) {
   s->sm = new SubMaster({"model", "controlsState", "uiLayoutState", "liveCalibration", "radarState", "thermal",
-                         "health", "carParams", "ubloxGnss", "driverState", "dMonitoringState", "sensorEvents", "carState", "liveMpc", "gpsLocationExternal", "liveParameters"});
+                         "health", "carParams", "ubloxGnss", "driverState", "dMonitoringState", "sensorEvents", "carState", "liveMpc", "gpsLocationExternal", "liveParameters", "pathPlan"});
 
   s->started = false;
   s->status = STATUS_OFFROAD;
@@ -269,6 +269,10 @@ void update_sockets(UIState *s) {
         s->light_sensor = sensor.getLight();
       }
     }
+  }
+
+  if (sm.updated("pathPlan")) {
+    scene.path_plan = sm["pathPlan"].getPathPlan();
   }
 
   s->started = scene.thermal.getStarted() || scene.frontview;

@@ -64,9 +64,13 @@ class PathPlanner():
     self.lane_change_ll_prob = 1.0
     self.prev_one_blinker = False
 
-    self.lane_change_adjust = [0.5, 1.3]
-    self.lane_change_adjust_vel = [16, 27]
+    self.mpc_frame = 0
+
+    self.lane_change_adjust = [0.3, 1.3]
+    self.lane_change_adjust_vel = [16, 30]
     self.lane_change_adjust_new = 0.0
+
+    self.new_steerRatio = CP.steerRatio
 
   def setup_mpc(self):
     self.libmpc = libmpc_py.libmpc
@@ -91,16 +95,32 @@ class PathPlanner():
 
     velocity_curvature = sm['controlsState'].vCurvature
     saturated_steering = sm['controlsState'].steerSaturated
+    live_steerratio = sm['liveParameters'].steerRatio
 
     angle_offset = sm['liveParameters'].angleOffset
 
     # Run MPC
     self.angle_steers_des_prev = self.angle_steers_des_mpc
 
+    if saturated_steering and not sm['carState'].steeringPressed:
+      self.mpc_frame += 1
+      if self.mpc_frame % 100 == 0:
+        self.new_steerRatio += 0.1
+        if self.new_steerRatio >= live_steerratio:
+          self.new_steerRatio = live_steerratio
+        self.mpc_frame = 0
+    else:
+      self.mpc_frame += 1
+      if self.mpc_frame % 100 == 0:
+        self.new_steerRatio -= 0.1
+        if self.new_steerRatio <= CP.steerRatio:
+          self.new_steerRatio = CP.steerRatio
+        self.mpc_frame = 0
+
     # Update vehicle model
     x = max(sm['liveParameters'].stiffnessFactor, 0.1)
     #sr = max(sm['liveParameters'].steerRatio, 0.1)
-    sr = max(CP.steerRatio, 0.1)
+    sr = max(self.new_steerRatio, 0.1)
     VM.update_params(x, sr)
 
     curvature_factor = VM.curvature_factor(v_ego)
@@ -232,6 +252,7 @@ class PathPlanner():
     plan_send.pathPlan.desire = desire
     plan_send.pathPlan.laneChangeState = self.lane_change_state
     plan_send.pathPlan.laneChangeDirection = self.lane_change_direction
+    plan_send.pathPlan.steerRatio = VM.sR
 
     pm.send('pathPlan', plan_send)
 
