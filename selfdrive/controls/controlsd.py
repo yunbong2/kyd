@@ -124,7 +124,7 @@ class Controls:
     self.distance_traveled = 0
     self.events_prev = []
     self.current_alert_types = [ET.PERMANENT]
-    self.steer_saturated = 0
+    self.steer_saturated = False
 
     self.sm['liveCalibration'].calStatus = Calibration.CALIBRATED
     self.sm['thermal'].freeSpace = 1.
@@ -391,12 +391,12 @@ class Controls:
       # Check if we deviated from the path
       left_deviation = actuators.steer > 0 and path_plan.dPoly[3] > 0.1
       right_deviation = actuators.steer < 0 and path_plan.dPoly[3] < -0.1
-      self.steer_saturated = 1
+      self.steer_saturated = True
 
       if left_deviation or right_deviation:
         self.events.add(EventName.steerSaturated)
     else:
-      self.steer_saturated = 0
+      self.steer_saturated = False
 
     return actuators, v_acc_sol, a_acc_sol, lac_log
 

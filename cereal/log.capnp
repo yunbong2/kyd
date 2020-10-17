@@ -555,6 +555,8 @@ struct ControlsState @0x97ff69c53601abf1 {
   applySteer @58 :Float32;
   applyAccel @59 :Float32;
 
+  steerSaturated @60 :Bool;
+
   lateralControlState :union {
     indiState @52 :LateralINDIState;
     pidState @53 :LateralPIDState;
