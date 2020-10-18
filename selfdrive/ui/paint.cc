@@ -507,18 +507,18 @@ static void ui_draw_tpms(UIState *s) {
   snprintf(tpmsRl, sizeof(tpmsRl), "%.1f", s->scene.tpmsPressureRl);
   snprintf(tpmsRr, sizeof(tpmsRr), "%.1f", s->scene.tpmsPressureRr);
   if (s->scene.tpmsPressureFl < 34) {
-    ui_draw_text(s->vg, pos_x-50, 138, tpmsFl, 35, COLOR_RED, s->font_sans_semibold);
+    ui_draw_text(s->vg, pos_x-50, 128, tpmsFl, 35, COLOR_RED, s->font_sans_semibold);
   } else if (s->scene.tpmsPressureFl > 50) {
-    ui_draw_text(s->vg, pos_x-50, 138, "N/A", 35, COLOR_WHITE_ALPHA(200), s->font_sans_semibold);
+    ui_draw_text(s->vg, pos_x-50, 128, "N/A", 35, COLOR_WHITE_ALPHA(200), s->font_sans_semibold);
   } else {
-    ui_draw_text(s->vg, pos_x-50, 138, tpmsFl, 35, COLOR_WHITE_ALPHA(200), s->font_sans_semibold);
+    ui_draw_text(s->vg, pos_x-50, 128, tpmsFl, 35, COLOR_WHITE_ALPHA(200), s->font_sans_semibold);
   }
   if (s->scene.tpmsPressureFr < 34) {
-    ui_draw_text(s->vg, pos_x+50, 138, tpmsFr, 35, COLOR_RED, s->font_sans_semibold);
+    ui_draw_text(s->vg, pos_x+50, 128, tpmsFr, 35, COLOR_RED, s->font_sans_semibold);
   } else if (s->scene.tpmsPressureFr > 50) {
-    ui_draw_text(s->vg, pos_x+50, 138, "N/A", 35, COLOR_WHITE_ALPHA(200), s->font_sans_semibold);
+    ui_draw_text(s->vg, pos_x+50, 128, "N/A", 35, COLOR_WHITE_ALPHA(200), s->font_sans_semibold);
   } else {
-    ui_draw_text(s->vg, pos_x+50, 138, tpmsFr, 35, COLOR_WHITE_ALPHA(200), s->font_sans_semibold);
+    ui_draw_text(s->vg, pos_x+50, 128, tpmsFr, 35, COLOR_WHITE_ALPHA(200), s->font_sans_semibold);
   }
   if (s->scene.tpmsPressureRl < 34) {
     ui_draw_text(s->vg, pos_x-50, 158, tpmsRl, 35, COLOR_RED, s->font_sans_semibold);
