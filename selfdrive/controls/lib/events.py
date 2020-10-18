@@ -480,7 +480,7 @@ EVENTS: Dict[int, Dict[str, Union[Alert, Callable[[Any, messaging.SubMaster, boo
   EventName.driverSteering: {
     ET.WARNING: Alert(
       "운전자 직접 조향중",
-      "자동조향이 일시 비활성화 됩니다",
+      "자동조향이 일시적으로 저하됩니다",
       AlertStatus.userPrompt, AlertSize.mid,
       Priority.LOW, VisualAlert.none, AudibleAlert.none, .0, .1, .1),
   },
