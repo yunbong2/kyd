@@ -138,6 +138,10 @@ typedef struct UIScene {
   char batteryStatus[64];
   char ipAddr[20];
   int fanSpeed;
+  float tpmsPressureFl;
+  float tpmsPressureFr;
+  float tpmsPressureRl;
+  float tpmsPressureRr;
 
 
   cereal::HealthData::HwType hwType;

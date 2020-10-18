@@ -409,9 +409,9 @@ static void ui_draw_world(UIState *s) {
   if (scene->lead_data[0].getStatus()) {
     draw_lead(s, scene->lead_data[0]);
   }
-  if (scene->lead_data[1].getStatus() && (std::abs(scene->lead_data[0].getDRel() - scene->lead_data[1].getDRel()) > 3.0)) {
-    draw_lead(s, scene->lead_data[1]);
-  }
+  //if (scene->lead_data[1].getStatus() && (std::abs(scene->lead_data[0].getDRel() - scene->lead_data[1].getDRel()) > 3.0)) {
+  //  draw_lead(s, scene->lead_data[1]);
+  //}
   nvgRestore(s->vg);
 }
 
@@ -452,6 +452,82 @@ static void ui_draw_vision_maxspeed(UIState *s) {
   }
 }
 
+static void ui_draw_tpms(UIState *s) {
+  char tpmsFl[32];
+  char tpmsFr[32];
+  char tpmsRl[32];
+  char tpmsRr[32];
+  int viz_tpms_w = 300;
+  int viz_tpms_h = 202;
+  int viz_tpms_x = s->scene.viz_rect.x + 1300;
+  int viz_tpms_y = s->scene.viz_rect.y + (bdr_s*1.5);
+  float maxv = 0;
+  float minv = 300;
+
+  if (maxv < s->scene.tpmsPressureFl) {
+    maxv = s->scene.tpmsPressureFl
+  }
+  if (maxv < s->scene.tpmsPressureFr) {
+    maxv = s->scene.tpmsPressureFr
+  }
+  if (maxv < s->scene.tpmsPressureRl) {
+    maxv = s->scene.tpmsPressureRl
+  }
+  if (maxv < s->scene.tpmsPressureRr) {
+    maxv = s->scene.tpmsPressureRr
+  }
+  if (minv > s->scene.tpmsPressureFl) {
+    minv = s->scene.tpmsPressureFl
+  }
+  if (minv > s->scene.tpmsPressureFr) {
+    minv = s->scene.tpmsPressureFr
+  }
+  if (minv > s->scene.tpmsPressureRl) {
+    minv = s->scene.tpmsPressureRl
+  }
+  if (minv > s->scene.tpmsPressureRr) {
+    minv = s->scene.tpmsPressureRr
+  }
+
+  // Draw Background
+  if ((maxv - minv) > 2) {
+    ui_draw_rect(s->vg, viz_tpms_x, viz_tpms_y, viz_tpms_w, viz_tpms_h, COLOR_RED_ALPHA(100), 20);    
+  } else {
+    ui_draw_rect(s->vg, viz_tpms_x, viz_tpms_y, viz_tpms_w, viz_tpms_h, COLOR_BLACK_ALPHA(100), 20);
+  }
+
+  // Draw Border
+  NVGcolor color = COLOR_WHITE_ALPHA(100);
+  ui_draw_rect(s->vg, viz_tpms_x, viz_tpms_y, viz_tpms_w, viz_tpms_h, color, 20, 5);
+
+  nvgTextAlign(s->vg, NVG_ALIGN_CENTER | NVG_ALIGN_BASELINE);
+  const int pos_x = viz_tpms_x + (viz_tpms_w / 2);
+  snprintf(tpmsFl, sizeof(tpmsFl), "%.1f", s->scene.tpmsPressureFl);
+  snprintf(tpmsFr, sizeof(tpmsFr), "%.1f", s->scene.tpmsPressureFr);
+  snprintf(tpmsRl, sizeof(tpmsRl), "%.1f", s->scene.tpmsPressureRl);
+  snprintf(tpmsRr, sizeof(tpmsRr), "%.1f", s->scene.tpmsPressureRr);
+  if (s->scene.tpmsPressureFl) < 34 {
+    ui_draw_text(s->vg, pos_x, 138, tpmsFl, 26, COLOR_RED, s->font_sans_regular);
+  } else {
+    ui_draw_text(s->vg, pos_x, 138, tpmsFl, 26, COLOR_WHITE_ALPHA(200), s->font_sans_regular);
+  }
+  if (s->scene.tpmsPressureFr) < 34 {
+    ui_draw_text(s->vg, pos_x+50, 138, tpmsFr, 26, COLOR_RED, s->font_sans_regular);
+  } else {
+    ui_draw_text(s->vg, pos_x+50, 138, tpmsFr, 26, COLOR_WHITE_ALPHA(200), s->font_sans_regular);
+  }
+  if (s->scene.tpmsPressureRl) < 34 {
+    ui_draw_text(s->vg, pos_x, 158, tpmsRl, 26, COLOR_RED, s->font_sans_regular);
+  } else {
+    ui_draw_text(s->vg, pos_x, 158, tpmsRl, 26, COLOR_WHITE_ALPHA(200), s->font_sans_regular);
+  }
+  if (s->scene.tpmsPressureRr) < 34 {
+    ui_draw_text(s->vg, pos_x+50, 158, tpmsRr, 26, COLOR_RED, s->font_sans_regular);
+  } else {
+    ui_draw_text(s->vg, pos_x+50, 158, tpmsRr, 26, COLOR_WHITE_ALPHA(200), s->font_sans_regular);
+  }
+}
+
 /*
   park @1;
   drive @2;
@@ -468,7 +544,7 @@ static void ui_draw_gear( UIState *s )
   NVGcolor nColor = COLOR_WHITE;
 
   int  ngetGearShifter = int(scene.getGearShifter);
-  int  x_pos = 1700;
+  int  x_pos = 1730;
   int  y_pos = 200;
   char str_msg[512];
 
@@ -975,6 +1051,7 @@ static void ui_draw_vision_footer(UIState *s) {
   nvgRect(s->vg, scene->viz_rect.x, s->scene.viz_rect.bottom(), scene->viz_rect.w, footer_h);
   ui_draw_vision_face(s);
   bb_ui_draw_UI(s);
+  ui_draw_tpms(s);
 }
 
 void ui_draw_vision_alert(UIState *s, cereal::ControlsState::AlertSize va_size, int va_color,
