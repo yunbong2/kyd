@@ -465,28 +465,28 @@ static void ui_draw_tpms(UIState *s) {
   float minv = 300;
 
   if (maxv < s->scene.tpmsPressureFl) {
-    maxv = s->scene.tpmsPressureFl
+    maxv = s->scene.tpmsPressureFl;
   }
   if (maxv < s->scene.tpmsPressureFr) {
-    maxv = s->scene.tpmsPressureFr
+    maxv = s->scene.tpmsPressureFr;
   }
   if (maxv < s->scene.tpmsPressureRl) {
-    maxv = s->scene.tpmsPressureRl
+    maxv = s->scene.tpmsPressureRl;
   }
   if (maxv < s->scene.tpmsPressureRr) {
-    maxv = s->scene.tpmsPressureRr
+    maxv = s->scene.tpmsPressureRr;
   }
   if (minv > s->scene.tpmsPressureFl) {
-    minv = s->scene.tpmsPressureFl
+    minv = s->scene.tpmsPressureFl;
   }
   if (minv > s->scene.tpmsPressureFr) {
-    minv = s->scene.tpmsPressureFr
+    minv = s->scene.tpmsPressureFr;
   }
   if (minv > s->scene.tpmsPressureRl) {
-    minv = s->scene.tpmsPressureRl
+    minv = s->scene.tpmsPressureRl;
   }
   if (minv > s->scene.tpmsPressureRr) {
-    minv = s->scene.tpmsPressureRr
+    minv = s->scene.tpmsPressureRr;
   }
 
   // Draw Background
