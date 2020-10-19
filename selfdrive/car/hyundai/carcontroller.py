@@ -259,7 +259,7 @@ class CarController():
       elif CS.out.cruiseState.modeSel == 2:
         self.steer_mode = "차간ONLY"
       elif CS.out.cruiseState.modeSel == 3:
-        self.steer_mode = "정체구간"
+        self.steer_mode = "편도1차선"
       if CS.out.steerWarning == 0:
         self.mdps_status = "정상"
       elif CS.out.steerWarning == 1:

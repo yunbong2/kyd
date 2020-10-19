@@ -493,6 +493,36 @@ EVENTS: Dict[int, Dict[str, Union[Alert, Callable[[Any, messaging.SubMaster, boo
       Priority.LOW, VisualAlert.none, AudibleAlert.none, 1., 1., 1.),
   },
 
+  EventName.modeChangeOpenpilot: {
+    ET.WARNING: Alert(
+      "오픈파일럿 모드",
+      "",
+      AlertStatus.normal, AlertSize.small,
+      Priority.LOW, VisualAlert.none, AudibleAlert.chimeModeOpenpilot, 1., 0, 1.),
+  },
+  
+  EventName.modeChangeDistcurv: {
+    ET.WARNING: Alert(
+      "차간+커브 제어 모드",
+      "",
+      AlertStatus.normal, AlertSize.small,
+      Priority.LOW, VisualAlert.none, AudibleAlert.chimeModeDistcurv, 1., 0, 1.),
+  },
+  EventName.modeChangeDistance: {
+    ET.WARNING: Alert(
+      "차간ONLY 제어 모드",
+      "",
+      AlertStatus.normal, AlertSize.small,
+      Priority.LOW, VisualAlert.none, AudibleAlert.chimeModeDistance, 1., 0, 1.),
+  },
+  EventName.modeChangeOneway: {
+    ET.WARNING: Alert(
+      "편도1차선 모드",
+      "",
+      AlertStatus.normal, AlertSize.small,
+      Priority.LOW, VisualAlert.none, AudibleAlert.chimeModeOneway, 1., 0, 1.),
+  },
+
   # ********** events that affect controls state transitions **********
 
   EventName.pcmEnable: {

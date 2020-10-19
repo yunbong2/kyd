@@ -117,6 +117,10 @@ struct CarEvent @0x9b1657f34caf3ad3 {
     laneChangeManual @91;
     emgButtonManual @92;
     driverSteering @93;
+    modeChangeOpenpilot @94;
+    modeChangeDistcurv @95;
+    modeChangeDistance @96;
+    modeChangeOneWay @97;
   }
 }
 
@@ -205,6 +209,7 @@ struct CarState {
     speedOffset @3 :Float32;
     standstill @4 :Bool;
     nonAdaptive @5 :Bool;
+    modeSel @6 :Int16;
   }
 
   enum GearShifter {
@@ -348,6 +353,18 @@ struct CarControl {
       chimeWarningRepeat @6;
       chimePrompt @7;
       chimeWarning2Repeat @8;
+      chimeReady @9;
+      chimeDoorOpen @10;
+      chimeGearDrive @11;
+      chimeLaneChange @12;
+      chimeLaneDeparture @13;
+      chimeRoadWarning @14;
+      chimeSeatBelt @15;
+      chimeViewUncertain @16;
+      chimeModeOpenpilot @17;
+      chimeModeDistcurv @18;
+      chimeModeDistance @19;
+      chimeModeOneway @20;
     }
   }
 }

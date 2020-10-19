@@ -199,7 +199,7 @@ class CarInterface(CarInterfaceBase):
     elif self.CC.mode_change_timer and self.CS.out.cruiseState.modeSel == 2:
       events.add(EventName.modeChangeDistance)
     elif self.CC.mode_change_timer and self.CS.out.cruiseState.modeSel == 3:
-      events.add(EventName.modeChangeTrafficjam)
+      events.add(EventName.modeChangeOneway)
 
   # handle button presses
     for b in ret.buttonEvents:

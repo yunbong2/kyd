@@ -145,12 +145,9 @@ class Spdctrl(SpdController):
         elif CS.out.cruiseState.modeSel == 2:
             self.steer_mode = "차간ONLY"
         elif CS.out.cruiseState.modeSel == 3:
-            self.steer_mode = "정체구간"
+            self.steer_mode = "편도1차선"
 
-        if CS.out.cruiseState.modeSel != 3:
-          str3 = '주행모드={:s}  설정속도={:03.0f}/{:03.0f}  타이머={:03.0f}/{:03.0f}'.format( self.steer_mode, set_speed, CS.VSetDis, long_wait_cmd, self.long_curv_timer )
-        elif CS.out.cruiseState.modeSel == 3:
-          str3 = '주행모드={:s}  설정속도={:03.0f}/{:03.0f}  거리조절={:03.0f}'.format( self.steer_mode, set_speed, CS.VSetDis, CS.cruiseGapSet )
+        str3 = '주행모드={:s}  설정속도={:03.0f}/{:03.0f}  타이머={:03.0f}/{:03.0f}'.format( self.steer_mode, set_speed, CS.VSetDis, long_wait_cmd, self.long_curv_timer )
         str4 = '  차=D:{:05.1f}/V:{:03.0f}  구분={:s}'.format(  CS.lead_distance, CS.lead_objspd, self.seq_step_debug )
 
         str5 = str3 + str4

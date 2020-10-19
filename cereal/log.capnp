@@ -556,6 +556,8 @@ struct ControlsState @0x97ff69c53601abf1 {
   applyAccel @59 :Float32;
 
   steerSaturated @60 :Bool;
+  alertTextMsg1  @61 :Text;
+  alertTextMsg2  @62 :Text;
 
   lateralControlState :union {
     indiState @52 :LateralINDIState;
@@ -890,6 +892,7 @@ struct PathPlan {
     preLaneChange @1;
     laneChangeStarting @2;
     laneChangeFinishing @3;
+    laneChangeDone @4;
   }
 
   enum LaneChangeDirection {
