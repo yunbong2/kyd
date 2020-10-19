@@ -22,7 +22,7 @@ from selfdrive.controls.lib.vehicle_model import VehicleModel
 from selfdrive.controls.lib.planner import LON_MPC_STEP
 from selfdrive.locationd.calibrationd import Calibration
 
-import common.log as  trace1
+import common.log as trace1
 
 LDW_MIN_SPEED = 50 * CV.KPH_TO_MS
 LANE_DEPARTURE_THRESHOLD = 0.1
@@ -417,12 +417,10 @@ class Controls:
 
   def publish_logs(self, CS, start_time, actuators, v_acc, a_acc, lac_log):
     """Send actuators and hud commands to the car, send controlsstate and MPC logging"""
-    global trace1
 
-
-    log_alertTextMsg1 = trace1.global_alertTextMsg1
-    log_alertTextMsg2 = trace1.global_alertTextMsg2
-    log_alertTextMsg1 += '  제어={}  컨트롤={}'.format( self.CP.lateralTuning.which(), self.controlsAllowed)
+    self.log_alertTextMsg1 = trace1.global_alertTextMsg1
+    self.log_alertTextMsg2 = trace1.global_alertTextMsg2
+    self.log_alertTextMsg1 += '  제어={}  컨트롤={}'.format( self.CP.lateralTuning.which(), self.controlsAllowed)
 
     CC = car.CarControl.new_message()
     CC.enabled = self.enabled
@@ -526,8 +524,8 @@ class Controls:
     controlsState.applySteer = CC.applySteer
     controlsState.applyAccel = CC.applyAccel
     controlsState.steerSaturated = self.steer_saturated
-    controlsState.alertTextMsg1 = str(log_alertTextMsg1)
-    controlsState.alertTextMsg2 = str(log_alertTextMsg2)
+    controlsState.alertTextMsg1 = self.log_alertTextMsg1
+    controlsState.alertTextMsg2 = self.log_alertTextMsg2
 
     if self.CP.lateralTuning.which() == 'pid':
       controlsState.lateralControlState.pidState = lac_log

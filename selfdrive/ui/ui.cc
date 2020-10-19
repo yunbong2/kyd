@@ -132,8 +132,8 @@ void update_sockets(UIState *s) {
     s->scene.output_scale = scene.controls_state.getLateralControlState().getPidState().getOutput();
     s->scene.angleSteersDes = scene.controls_state.getAngleSteersDes();
 
-    s->scene.user_text1 = scene.controls_state.getAlertTextMsg1(); //debug1
-    s->scene.user_text2 = scene.controls_state.getAlertTextMsg2(); //debug2
+    s->scene.alertTextMsg1 = scene.controls_state.getAlertTextMsg1(); //debug1
+    s->scene.alertTextMsg1 = scene.controls_state.getAlertTextMsg2(); //debug2
 
     // TODO: the alert stuff shouldn't be handled here
     auto alert_sound = scene.controls_state.getAlertSound();
