@@ -120,7 +120,7 @@ struct CarEvent @0x9b1657f34caf3ad3 {
     modeChangeOpenpilot @94;
     modeChangeDistcurv @95;
     modeChangeDistance @96;
-    modeChangeOneWay @97;
+    modeChangeOneway @97;
   }
 }
 
