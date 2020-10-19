@@ -543,8 +543,8 @@ static void ui_draw_debug(UIState *s)
   nvgTextAlign(s->vg, NVG_ALIGN_LEFT | NVG_ALIGN_BASELINE);
   nvgFontSize(s->vg, 36*1.5*0.8);
 
-  ui_print(s, 0, 1020, "%s", scene.user_text1.c_str());
-  ui_print(s, 0, 1078, "%s", scene.user_text2.c_str());
+  ui_print(s, 0, 1020, "%s", scene.user_text1);
+  ui_print(s, 0, 1078, "%s", scene.user_text2);
 }
 
 /*
@@ -659,9 +659,10 @@ static void ui_draw_vision_event(UIState *s) {
     }
     else  
     {
-      ui_draw_gear( s );
+      ui_draw_gear(s);
     }
   }
+  ui_draw_debug(s);
 }
 
 static void ui_draw_vision_face(UIState *s) {
@@ -1071,7 +1072,6 @@ static void ui_draw_vision_footer(UIState *s) {
   ui_draw_vision_face(s);
   bb_ui_draw_UI(s);
   ui_draw_tpms(s);
-  ui_draw_debug(s);
 }
 
 void ui_draw_vision_alert(UIState *s, cereal::ControlsState::AlertSize va_size, int va_color,
