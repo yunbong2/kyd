@@ -128,7 +128,6 @@ class CarController():
     apply_accel = clip(apply_accel * ACCEL_SCALE, ACCEL_MIN, ACCEL_MAX)
 
     self.dRel, self.yRel, self.vRel = SpdController.get_lead(sm)
-
     self.model_speed, self.model_sum = self.SC.calc_va(sm, CS.out.vEgo)
 
 
