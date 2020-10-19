@@ -81,6 +81,8 @@ class CarState(CarStateBase):
     ret.cruiseState.standstill = cp_scc.vl["SCC11"]['SCCInfoDisplay'] == 4 if not self.no_radar else False
     self.is_set_speed_in_mph = bool(cp.vl["CLU11"]["CF_Clu_SPEED_UNIT"])
     
+    self.acc_active = (cp_scc.vl["SCC12"]['ACCMode'] != 0)
+    
     self.cruiseState_modeSel, speed_kph = self.SC.update_cruiseSW(self)
     ret.cruiseState.modeSel = self.cruiseState_modeSel
 
