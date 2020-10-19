@@ -142,7 +142,7 @@ class Controls:
 #      self.events.add(EventName.internetConnectivityNeeded, static=True)
     if community_feature_disallowed:
       self.events.add(EventName.communityFeatureDisallowed, static=True)
-    if not car_recognized not passive:
+    if not car_recognized and not passive:
       self.events.add(EventName.carUnrecognized, static=True)
     #if hw_type == HwType.whitePanda:
     #  self.events.add(EventName.whitePandaUnsupported, static=True)
