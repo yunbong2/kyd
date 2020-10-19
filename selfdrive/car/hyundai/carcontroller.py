@@ -232,9 +232,9 @@ class CarController():
       can_sends.append(create_clu11(self.packer, frame, CS.mdps_bus, CS.clu11, Buttons.NONE, enabled_speed))
 
 
-    str_log1 = '곡률={:05.1f}'.format(  self.model_speed )
-    str_log2 = '프레임율={:03.0f}  TPMS=FL:{:04.1f}/FR:{:04.1f}/RL:{:04.1f}/RR:{:04.1f}'.format( self.timer1.sampleTime(), CS.tpmsPressureFl, CS.tpmsPressureFr, CS.tpmsPressureRl, CS.tpmsPressureRr )
-    trace1.printf( '{}  {}'.format( str_log1, str_log2 ) )
+    str_log1 = '곡률={:05.1f}  토크={:03.0f}'.format(self.model_speed, new_steer)
+    str_log2 = '프레임율={:03.0f}'.format(self.timer1.sampleTime())
+    trace1.printf( '{}  {}'.format(str_log1, str_log2))
 
     if CS.out.cruiseState.modeSel == 0 and self.mode_change_switch == 3:
       self.mode_change_timer = 50
