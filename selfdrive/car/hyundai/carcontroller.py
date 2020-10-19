@@ -93,6 +93,7 @@ class CarController():
     self.mdps_status = ""
     self.lkas_switch = ""
 
+    self.timer1 = tm.CTime1000("time")
     self.SC = Spdctrl()
     self.model_speed = 0
     self.model_sum = 0
