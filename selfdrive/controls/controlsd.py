@@ -1,4 +1,4 @@
-﻿#!/usr/bin/env python3
+#!/usr/bin/env python3
 import os
 from cereal import car, log
 from common.hardware import HARDWARE
