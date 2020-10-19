@@ -3,6 +3,7 @@ from selfdrive.car.hyundai.values import DBC, STEER_THRESHOLD, FEATURES, CAR
 from selfdrive.car.interfaces import CarStateBase
 from opendbc.can.parser import CANParser
 from selfdrive.config import Conversions as CV
+from selfdrive.car.hyundai.spdcontroller  import SpdController
 
 GearShifter = car.CarState.GearShifter
 
@@ -22,6 +23,10 @@ class CarState(CarStateBase):
     self.cruise_main_button = 0
     self.mdps_error_cnt = 0
     self.spas_enabled = CP.spasEnabled
+    
+    self.cruiseState_modeSel = 0
+    self.SC = SpdController()
+
     # blinker
     self.left_blinker_flash = 0
     self.right_blinker_flash = 0  
@@ -75,9 +80,13 @@ class CarState(CarStateBase):
                                       cp.vl['EMS16']['CRUISE_LAMP_M'] != 0
     ret.cruiseState.standstill = cp_scc.vl["SCC11"]['SCCInfoDisplay'] == 4 if not self.no_radar else False
     self.is_set_speed_in_mph = bool(cp.vl["CLU11"]["CF_Clu_SPEED_UNIT"])
+    
+    self.cruiseState_modeSel, speed_kph = self.SC.update_cruiseSW(self)
+    ret.cruiseState.modeSel = self.cruiseState_modeSel
+
     if ret.cruiseState.enabled:
       speed_conv = CV.MPH_TO_MS if self.is_set_speed_in_mph else CV.KPH_TO_MS
-      ret.cruiseState.speed = cp_scc.vl["SCC11"]['VSetDis'] * speed_conv if not self.no_radar else \
+      ret.cruiseState.speed = speed_kph * speed_conv if not self.no_radar else \
                                          cp.vl["LVR12"]["CF_Lvr_CruiseSet"] * speed_conv
     else:
       ret.cruiseState.speed = 0
@@ -104,6 +113,8 @@ class CarState(CarStateBase):
     ret.tpmsPressureFr = cp.vl["TPMS11"]['PRESSURE_FR'] * 5 * 0.145
     ret.tpmsPressureRl = cp.vl["TPMS11"]['PRESSURE_RL'] * 5 * 0.145
     ret.tpmsPressureRr = cp.vl["TPMS11"]['PRESSURE_RR'] * 5 * 0.145
+
+    self.cruiseGapSet = cp_scc.vl["SCC11"]['TauGapSet']
 
 
     # TODO: refactor gear parsing in function

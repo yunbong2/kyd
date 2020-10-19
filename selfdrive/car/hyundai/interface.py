@@ -163,8 +163,8 @@ class CarInterface(CarInterfaceBase):
         be.type = ButtonType.decelCruise
       elif but == Buttons.GAP_DIST:
         be.type = ButtonType.gapAdjustCruise
-      #elif but == Buttons.CANCEL:
-      #  be.type = ButtonType.cancel
+      elif but == Buttons.CANCEL:
+        be.type = ButtonType.cancel
       else:
         be.type = ButtonType.unknown
       buttonEvents.append(be)
@@ -192,6 +192,15 @@ class CarInterface(CarInterfaceBase):
     #if self.CC.driver_steering_torque_above_timer:
     #  events.add(EventName.driverSteering)
 
+    if self.CC.mode_change_timer and self.CS.out.cruiseState.modeSel == 0:
+      events.add(EventName.modeChangeOpenpilot)
+    elif self.CC.mode_change_timer and self.CS.out.cruiseState.modeSel == 1:
+      events.add(EventName.modeChangeDistcurv)
+    elif self.CC.mode_change_timer and self.CS.out.cruiseState.modeSel == 2:
+      events.add(EventName.modeChangeDistance)
+    elif self.CC.mode_change_timer and self.CS.out.cruiseState.modeSel == 3:
+      events.add(EventName.modeChangeTrafficjam)
+
   # handle button presses
     for b in ret.buttonEvents:
       # do disable on button down
@@ -215,10 +224,10 @@ class CarInterface(CarInterfaceBase):
     self.CS.out = ret.as_reader()
     return self.CS.out
 
-  def apply(self, c):
+  def apply(self, c, sm):
     can_sends = self.CC.update(c.enabled, self.CS, self.frame, c, c.actuators,
                                c.cruiseControl.cancel, c.hudControl.visualAlert, c.hudControl.leftLaneVisible,
                                c.hudControl.rightLaneVisible, c.hudControl.leftLaneDepart, c.hudControl.rightLaneDepart,
-                               c.hudControl.setSpeed, c.hudControl.leadVisible)
+                               c.hudControl.setSpeed, c.hudControl.leadVisible, sm)
     self.frame += 1
     return can_sends
