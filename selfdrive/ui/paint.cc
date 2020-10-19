@@ -543,8 +543,8 @@ static void ui_draw_debug(UIState *s)
   nvgTextAlign(s->vg, NVG_ALIGN_LEFT | NVG_ALIGN_BASELINE);
   nvgFontSize(s->vg, 36*1.5*0.8);
 
-  ui_print(s, 0, 1020, "%s", scene.user_text1);
-  ui_print(s, 0, 1078, "%s", scene.user_text2);
+  ui_print(s, 0, 1020, "%s", scene.user_text1.c_str());
+  ui_print(s, 0, 1078, "%s", scene.user_text2.c_str());
 }
 
 /*
