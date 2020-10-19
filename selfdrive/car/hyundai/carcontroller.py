@@ -131,10 +131,6 @@ class CarController():
     #lkas_active = enabled and abs(CS.out.steeringAngle) < 90. and not spas_active
     lkas_active = enabled and not spas_active
 
-    # fix for Genesis hard fault at low speed
-    if CS.out.vEgo < 60 * CV.KPH_TO_MS and self.car_fingerprint == CAR.GENESIS and not CS.mdps_bus:
-      lkas_active = False
-
     if (( CS.out.leftBlinker and not CS.out.rightBlinker) or ( CS.out.rightBlinker and not CS.out.leftBlinker)) and CS.out.vEgo <= 59 * CV.KPH_TO_MS:
       self.lanechange_manual_timer = 10
     if CS.out.leftBlinker and CS.out.rightBlinker:
