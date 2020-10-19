@@ -29,6 +29,8 @@ class CarState(CarStateBase):
     self.cruiseState_modeSel = 0
     self.SC = SpdController()
 
+    self.driverAcc_time = 0
+
     # blinker
     self.left_blinker_flash = 0
     self.right_blinker_flash = 0  
@@ -80,6 +82,11 @@ class CarState(CarStateBase):
     lead_objspd = cp_scc.vl["SCC11"]['ACC_ObjRelSpd']
     self.lead_objspd = lead_objspd * CV.MS_TO_KPH
     self.Mdps_ToiUnavail = cp_mdps.vl["MDPS12"]['CF_Mdps_ToiUnavail']
+    self.driverOverride = cp.vl["TCS13"]["DriverOverride"]
+    if self.driverOverride == 1:
+      self.driverAcc_time = 100
+    elif self.driverAcc_time:
+      self.driverAcc_time -= 1
 
     # cruise state
     ret.cruiseState.enabled = (cp_scc.vl["SCC12"]['ACCMode'] != 0) if not self.no_radar else \
@@ -283,6 +290,7 @@ class CarState(CarStateBase):
       ("ACCEnable", "TCS13", 0),
       ("BrakeLight", "TCS13", 0),
       ("DriverBraking", "TCS13", 0),
+      ("DriverOverride", "TCS13", 0),
       ("CF_VSM_Avail", "TCS13", 0),
 
       ("ESC_Off_Step", "TCS15", 0),

@@ -421,9 +421,6 @@ class Controls:
     self.log_alertTextMsg1 = trace1.global_alertTextMsg1
     self.log_alertTextMsg2 = trace1.global_alertTextMsg2
     self.log_alertTextMsg1 += '  제어={}  컨트롤={}'.format( self.CP.lateralTuning.which(), self.controlsAllowed)
-    
-    print('log1={}'.format(self.log_alertTextMsg1))
-    print('log2={}'.format(self.log_alertTextMsg2))
 
     CC = car.CarControl.new_message()
     CC.enabled = self.enabled

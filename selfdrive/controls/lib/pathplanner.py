@@ -106,16 +106,16 @@ class PathPlanner():
     # Run MPC
     self.angle_steers_des_prev = self.angle_steers_des_mpc
 
-    if saturated_steering and not sm['carState'].steeringPressed:
+    if saturated_steering:
       self.mpc_frame += 1
-      if self.mpc_frame % 100 == 0:
+      if self.mpc_frame % 200 == 0:
         self.new_steerRatio += 0.1
         if self.new_steerRatio >= live_steerratio:
           self.new_steerRatio = live_steerratio
         self.mpc_frame = 0
     else:
       self.mpc_frame += 1
-      if self.mpc_frame % 200 == 0:
+      if self.mpc_frame % 300 == 0:
         self.new_steerRatio -= 0.1
         if self.new_steerRatio <= CP.steerRatio:
           self.new_steerRatio = CP.steerRatio

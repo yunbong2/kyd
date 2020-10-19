@@ -543,8 +543,8 @@ static void ui_draw_debug(UIState *s)
 
   nvgTextAlign(s->vg, NVG_ALIGN_LEFT | NVG_ALIGN_BASELINE);
 
-  ui_draw_text(s->vg, 0, 1020, scene.alertTextMsg1.c_str(), 42, COLOR_WHITE_ALPHA(200), s->font_sans_semibold);
-  ui_draw_text(s->vg, 0, 1078, scene.alertTextMsg2.c_str(), 42, COLOR_WHITE_ALPHA(200), s->font_sans_semibold);
+  ui_draw_text(s->vg, 0, 1020, scene.alertTextMsg1.c_str(), 50, COLOR_WHITE_ALPHA(200), s->font_sans_semibold);
+  ui_draw_text(s->vg, 0, 1078, scene.alertTextMsg2.c_str(), 50, COLOR_WHITE_ALPHA(200), s->font_sans_semibold);
 }
 
 /*
@@ -662,6 +662,7 @@ static void ui_draw_vision_event(UIState *s) {
       ui_draw_gear(s);
     }
   }
+  ui_draw_debug(s);
 }
 
 static void ui_draw_vision_face(UIState *s) {
@@ -1071,7 +1072,6 @@ static void ui_draw_vision_footer(UIState *s) {
   ui_draw_vision_face(s);
   bb_ui_draw_UI(s);
   ui_draw_tpms(s);
-  ui_draw_debug(s);
 }
 
 void ui_draw_vision_alert(UIState *s, cereal::ControlsState::AlertSize va_size, int va_color,
