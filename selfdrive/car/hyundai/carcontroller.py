@@ -275,7 +275,7 @@ class CarController():
       self.cruise_gap = CS.cruiseGapSet
 
 
-      str_log2 = '주행모드={:s}  MDPS상태={:s}  LKAS버튼={:s}  크루즈갭:{:1.0f}'.format( self.steer_mode, self.mdps_status, self.lkas_switch, self.cruise_gap )
+      str_log2 = '주행모드={:s}  MDPS상태={:s}  LKAS버튼={:s}  크루즈갭={:1.0f}'.format( self.steer_mode, self.mdps_status, self.lkas_switch, self.cruise_gap )
       trace1.printf2( '{}'.format( str_log2 ) )
 
 
