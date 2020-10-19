@@ -234,7 +234,7 @@ class CarController():
 
     str_log1 = '곡률={:05.1f}  토크={:03.0f}'.format(self.model_speed, new_steer)
     str_log2 = '프레임율={:03.0f}'.format(self.timer1.sampleTime())
-    trace1.printf( '{}  {}'.format(str_log1, str_log2))
+    trace1.printf1( '{}  {}'.format(str_log1, str_log2))
 
     if CS.out.cruiseState.modeSel == 0 and self.mode_change_switch == 3:
       self.mode_change_timer = 50
