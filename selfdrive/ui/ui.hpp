@@ -115,6 +115,8 @@ typedef struct UIScene {
   float lead_d_rel, lead_v_rel;
   std::string alert_text1;
   std::string alert_text2;
+  std::string alertTextMsg1;
+  std::string alertTextMsg2;
   std::string alert_type;
   cereal::ControlsState::AlertSize alert_size;
 
@@ -144,9 +146,6 @@ typedef struct UIScene {
   float tpmsPressureFr;
   float tpmsPressureRl;
   float tpmsPressureRr;
-
-  char alertTextMsg1[512];
-  char alertTextMsg2[512];
 
   cereal::HealthData::HwType hwType;
   int satelliteCount;

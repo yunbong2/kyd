@@ -540,15 +540,11 @@ static void ui_draw_tpms(UIState *s) {
 static void ui_draw_debug(UIState *s) 
 {
   UIScene &scene = s->scene;
-  char userText1[512];
-  char userText2[512];
 
   nvgTextAlign(s->vg, NVG_ALIGN_LEFT | NVG_ALIGN_BASELINE);
 
-  snprintf(userText1, sizeof(userText1), "%s", scene.alertTextMsg1.c_str());
-  snprintf(userText2, sizeof(userText2), "%s", scene.alertTextMsg2.c_str());
-  ui_draw_text(s->vg, 0, 1020, userText1, 42, COLOR_WHITE_ALPHA(200), s->font_sans_semibold);
-  ui_draw_text(s->vg, 0, 1078, userText2, 42, COLOR_WHITE_ALPHA(200), s->font_sans_semibold);
+  ui_draw_text(s->vg, 0, 1020, scene.alertTextMsg1, 42, COLOR_WHITE_ALPHA(200), s->font_sans_semibold);
+  ui_draw_text(s->vg, 0, 1078, scene.alertTextMsg2, 42, COLOR_WHITE_ALPHA(200), s->font_sans_semibold);
 }
 
 /*
