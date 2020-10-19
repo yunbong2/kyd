@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+﻿#!/usr/bin/env python3
 import os
 from cereal import car, log
 from common.hardware import HARDWARE
@@ -204,7 +204,7 @@ class Controls:
         else:
           self.events.add(EventName.preLaneChangeRight)
     elif self.sm['pathPlan'].laneChangeState in [LaneChangeState.laneChangeStarting,
-                                                 LaneChangeState.laneChangeFinishing]:
+                                                 LaneChangeState.laneChangeFinishing, LaneChangeState.laneChangeDone]:
       self.events.add(EventName.laneChange)
 
     if self.can_rcv_error or (not CS.canValid and self.sm.frame > 5 / DT_CTRL):
@@ -422,6 +422,7 @@ class Controls:
 
     log_alertTextMsg1 = trace1.global_alertTextMsg1
     log_alertTextMsg2 = trace1.global_alertTextMsg2
+    log_alertTextMsg1 += '  제어={}  컨트롤={}'.format( self.CP.lateralTuning.which(), self.controlsAllowed)
 
     CC = car.CarControl.new_message()
     CC.enabled = self.enabled
@@ -525,6 +526,8 @@ class Controls:
     controlsState.applySteer = CC.applySteer
     controlsState.applyAccel = CC.applyAccel
     controlsState.steerSaturated = self.steer_saturated
+    controlsState.alertTextMsg1 = str(log_alertTextMsg1)
+    controlsState.alertTextMsg2 = str(log_alertTextMsg2)
 
     if self.CP.lateralTuning.which() == 'pid':
       controlsState.lateralControlState.pidState = lac_log
