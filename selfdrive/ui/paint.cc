@@ -409,9 +409,9 @@ static void ui_draw_world(UIState *s) {
   if (scene->lead_data[0].getStatus()) {
     draw_lead(s, scene->lead_data[0]);
   }
-  //if (scene->lead_data[1].getStatus() && (std::abs(scene->lead_data[0].getDRel() - scene->lead_data[1].getDRel()) > 3.0)) {
-  //  draw_lead(s, scene->lead_data[1]);
-  //}
+  if (scene->lead_data[1].getStatus() && (std::abs(scene->lead_data[0].getDRel() - scene->lead_data[1].getDRel()) > 3.0)) {
+    draw_lead(s, scene->lead_data[1]);
+  }
   nvgRestore(s->vg);
 }
 
@@ -490,7 +490,7 @@ static void ui_draw_tpms(UIState *s) {
   }
 
   // Draw Background
-  if ((maxv - minv) > 2) {
+  if ((maxv - minv) > 3) {
     ui_draw_rect(s->vg, viz_tpms_x, viz_tpms_y, viz_tpms_w, viz_tpms_h, COLOR_RED_ALPHA(100), 20);    
   } else {
     ui_draw_rect(s->vg, viz_tpms_x, viz_tpms_y, viz_tpms_w, viz_tpms_h, COLOR_BLACK_ALPHA(100), 20);
@@ -508,28 +508,28 @@ static void ui_draw_tpms(UIState *s) {
   snprintf(tpmsRl, sizeof(tpmsRl), "%.1f", s->scene.tpmsPressureRl);
   snprintf(tpmsRr, sizeof(tpmsRr), "%.1f", s->scene.tpmsPressureRr);
   if (s->scene.tpmsPressureFl < 34) {
-    ui_draw_text(s->vg, pos_x-50, 160, tpmsFl, 45, COLOR_RED, s->font_sans_semibold);
+    ui_draw_text(s->vg, pos_x-50, 160, tpmsFl, 45, COLOR_RED, s->font_sans_bold);
   } else if (s->scene.tpmsPressureFl > 50) {
     ui_draw_text(s->vg, pos_x-50, 160, "N/A", 45, COLOR_WHITE_ALPHA(200), s->font_sans_semibold);
   } else {
     ui_draw_text(s->vg, pos_x-50, 160, tpmsFl, 45, COLOR_WHITE_ALPHA(200), s->font_sans_semibold);
   }
   if (s->scene.tpmsPressureFr < 34) {
-    ui_draw_text(s->vg, pos_x+50, 160, tpmsFr, 45, COLOR_RED, s->font_sans_semibold);
+    ui_draw_text(s->vg, pos_x+50, 160, tpmsFr, 45, COLOR_RED, s->font_sans_bold);
   } else if (s->scene.tpmsPressureFr > 50) {
     ui_draw_text(s->vg, pos_x+50, 160, "N/A", 45, COLOR_WHITE_ALPHA(200), s->font_sans_semibold);
   } else {
     ui_draw_text(s->vg, pos_x+50, 160, tpmsFr, 45, COLOR_WHITE_ALPHA(200), s->font_sans_semibold);
   }
   if (s->scene.tpmsPressureRl < 34) {
-    ui_draw_text(s->vg, pos_x-50, 200, tpmsRl, 45, COLOR_RED, s->font_sans_semibold);
+    ui_draw_text(s->vg, pos_x-50, 200, tpmsRl, 45, COLOR_RED, s->font_sans_bold);
   } else if (s->scene.tpmsPressureRl > 50) {
     ui_draw_text(s->vg, pos_x-50, 200, "N/A", 45, COLOR_WHITE_ALPHA(200), s->font_sans_semibold);
   } else {
     ui_draw_text(s->vg, pos_x-50, 200, tpmsRl, 45, COLOR_WHITE_ALPHA(200), s->font_sans_semibold);
   }
   if (s->scene.tpmsPressureRr < 34) {
-    ui_draw_text(s->vg, pos_x+50, 200, tpmsRr, 45, COLOR_RED, s->font_sans_semibold);
+    ui_draw_text(s->vg, pos_x+50, 200, tpmsRr, 45, COLOR_RED, s->font_sans_bold);
   } else if (s->scene.tpmsPressureRr > 50) {
     ui_draw_text(s->vg, pos_x+50, 200, "N/A", 45, COLOR_WHITE_ALPHA(200), s->font_sans_semibold);
   } else {
@@ -897,20 +897,20 @@ static void bb_ui_draw_measures_right(UIState *s, int bb_x, int bb_y, int bb_w )
     char val_str[16];
     char uom_str[6];
     NVGcolor val_color = COLOR_WHITE_ALPHA(200);
-    if (scene->lead_data[0].getStatus()) {
+    if (s->scene.lead_status) {
       //show RED if less than 5 meters
       //show orange if less than 15 meters
-      if((int)(scene->lead_data[0].getDRel()) < 15) {
+      if((int)(s->scene.lead_d_rel) < 15) {
         val_color = COLOR_ORANGE_ALPHA(200);
       }
-      if((int)(scene->lead_data[0].getDRel()) < 5) {
+      if((int)(s->scene.lead_d_rel) < 5) {
         val_color = COLOR_RED_ALPHA(200);
       }
       // lead car relative distance is always in meters
-      if((float)(scene->lead_data[0].getDRel()) < 10) {
-        snprintf(val_str, sizeof(val_str), "%.1f", (float)scene->lead_data[0].getDRel());
+      if((float)(s->scene.lead_d_rel) < 10) {
+        snprintf(val_str, sizeof(val_str), "%.1f", (float)s->scene.lead_d_rel);
       } else {
-        snprintf(val_str, sizeof(val_str), "%d", (int)scene->lead_data[0].getDRel());
+        snprintf(val_str, sizeof(val_str), "%d", (int)s->scene.lead_d_rel);
       }
 
     } else {
@@ -929,20 +929,20 @@ static void bb_ui_draw_measures_right(UIState *s, int bb_x, int bb_y, int bb_w )
     char val_str[16];
     char uom_str[6];
     NVGcolor val_color = COLOR_WHITE_ALPHA(200);
-    if (scene->lead_data[0].getStatus()) {
+    if (s->scene.lead_status) {
       //show Orange if negative speed (approaching)
       //show Orange if negative speed faster than 5mph (approaching fast)
-      if((int)(scene->lead_data[0].getVRel()) < 0) {
-        val_color = COLOR_ORANGE_ALPHA(200);
+      if((int)(s->scene.lead_v_rel) < 0) {
+        val_color = nvgRGBA(255, 188, 3, 200);
       }
-      if((int)(scene->lead_data[0].getVRel()) < -5) {
-        val_color = COLOR_RED_ALPHA(200);
+      if((int)(s->scene.lead_v_rel) < -5) {
+        val_color = nvgRGBA(255, 0, 0, 200);
       }
       // lead car relative speed is always in meters
       if (s->is_metric) {
-         snprintf(val_str, sizeof(val_str), "%d", (int)(scene->lead_data[0].getVRel() * 3.6 + 0.5));
+         snprintf(val_str, sizeof(val_str), "%d", (int)(s->scene.lead_v_rel * 3.6 + 0.5));
       } else {
-         snprintf(val_str, sizeof(val_str), "%d", (int)(scene->lead_data[0].getVRel() * 2.2374144 + 0.5));
+         snprintf(val_str, sizeof(val_str), "%d", (int)(s->scene.lead_v_rel * 2.2374144 + 0.5));
       }
     } else {
        snprintf(val_str, sizeof(val_str), "-");

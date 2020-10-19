@@ -118,7 +118,7 @@ class CarInterface(CarInterfaceBase):
     ret.sasBus = 1 if 688 in fingerprint[1] and 1296 not in fingerprint[1] else 0
     ret.sccBus = 0 if 1056 in fingerprint[0] else 1 if 1056 in fingerprint[1] and 1296 not in fingerprint[1] \
                                                                      else 2 if 1056 in fingerprint[2] else -1
-    ret.radarOffCan = ret.sccBus == -1
+    ret.radarOffCan = False
     ret.openpilotLongitudinalControl = False
     ret.enableCruise = not ret.radarOffCan
     ret.spasEnabled = False
@@ -189,8 +189,8 @@ class CarInterface(CarInterfaceBase):
       events.add(EventName.laneChangeManual)
     if self.CC.emergency_manual_timer:
       events.add(EventName.emgButtonManual)
-    if self.CC.driver_steering_torque_above_timer:
-      events.add(EventName.driverSteering)
+    #if self.CC.driver_steering_torque_above_timer:
+    #  events.add(EventName.driverSteering)
 
   # handle button presses
     for b in ret.buttonEvents:
