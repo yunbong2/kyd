@@ -537,6 +537,16 @@ static void ui_draw_tpms(UIState *s) {
   }
 }
 
+static void ui_draw_debug(UIState *s) 
+{
+  UIScene &scene = s->scene;
+  nvgTextAlign(s->vg, NVG_ALIGN_LEFT | NVG_ALIGN_BASELINE);
+  nvgFontSize(s->vg, 36*1.5*0.8);
+
+  ui_print(s, 0, 1020, "%s", scene.alert.text1);
+  ui_print(s, 0, 1078, "%s", scene.alert.text2);
+}
+
 /*
   park @1;
   drive @2;
@@ -618,6 +628,8 @@ static void ui_draw_vision_speed(UIState *s) {
   snprintf(speed_str, sizeof(speed_str), "%d", (int)speed);
   ui_draw_text(s->vg, viz_rect.centerX(), 240, speed_str, 96*2.5, val_color, s->font_sans_bold);
   ui_draw_text(s->vg, viz_rect.centerX(), 320, s->is_metric?"km/h":"mph", 36*2.5, COLOR_WHITE_ALPHA(200), s->font_sans_regular);
+
+  ui_draw_debug(s);  
 }
 
 static void ui_draw_vision_event(UIState *s) {
