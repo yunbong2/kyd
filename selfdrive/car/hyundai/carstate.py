@@ -23,6 +23,7 @@ class CarState(CarStateBase):
     self.cruise_main_button = 0
     self.mdps_error_cnt = 0
     self.spas_enabled = CP.spasEnabled
+    self.acc_active = False
     
     self.cruiseState_modeSel = 0
     self.SC = SpdController()
