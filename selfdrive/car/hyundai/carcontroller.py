@@ -233,8 +233,8 @@ class CarController():
       can_sends.append(create_clu11(self.packer, frame, CS.mdps_bus, CS.clu11, Buttons.NONE, enabled_speed))
 
 
-    str_log1 = '곡률={:05.1f}  토크={:03.0f}'.format(self.model_speed, new_steer)
-    str_log2 = '프레임율={:03.0f}'.format(self.timer1.sampleTime())
+    str_log1 = '곡률={:05.1f}  토크={:03.0f}'.format(self.model_speed, abs(new_steer))
+    str_log2 = '프레임률={:03.0f}'.format(self.timer1.sampleTime())
     trace1.printf1( '{}  {}'.format(str_log1, str_log2))
 
     if CS.out.cruiseState.modeSel == 0 and self.mode_change_switch == 3:
