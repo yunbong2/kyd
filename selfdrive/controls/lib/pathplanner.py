@@ -110,14 +110,14 @@ class PathPlanner():
     #if saturated_steering:
     if mode_select == 3:
       self.mpc_frame += 1
-      if self.mpc_frame % 200 == 0:
+      if self.mpc_frame % 20 == 0:
         self.new_steerRatio += 0.1
         if self.new_steerRatio >= live_steerratio:
           self.new_steerRatio = live_steerratio
         self.mpc_frame = 0
     else:
       self.mpc_frame += 1
-      if self.mpc_frame % 400 == 0:
+      if self.mpc_frame % 50 == 0:
         self.new_steerRatio -= 0.1
         if self.new_steerRatio <= CP.steerRatio:
           self.new_steerRatio = CP.steerRatio
@@ -209,10 +209,8 @@ class PathPlanner():
     # account for actuation delay
     if mode_select == 3:
       self.cur_state = calc_states_after_delay(self.cur_state, v_ego, angle_steers - angle_offset, curvature_factor, VM.sR, 0.3)
-      print("0.3 ok")
     else:
       self.cur_state = calc_states_after_delay(self.cur_state, v_ego, angle_steers - angle_offset, curvature_factor, VM.sR, CP.steerActuatorDelay)
-      print("CP.steerActuatorDelay")
 
     v_ego_mpc = max(v_ego, 5.0)  # avoid mpc roughness due to low speed
     self.libmpc.run_mpc(self.cur_state, self.mpc_solution,
