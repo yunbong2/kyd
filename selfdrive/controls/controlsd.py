@@ -250,7 +250,7 @@ class Controls:
     #  and self.CP.openpilotLongitudinalControl and CS.vEgo < 0.3:
     #  self.events.add(EventName.noTarget)
 
-    if CS.vEgo =< 5:
+    if CS.vEgo <= 5:
       self.LaC = LatControlLQR(self.CP)
     elif CS.vEgo > 5:
       self.LaC = LatControlPID(self.CP)
@@ -541,7 +541,7 @@ class Controls:
     #  controlsState.lateralControlState.lqrState = lac_log
     #elif self.CP.lateralTuning.which() == 'indi':
     #  controlsState.lateralControlState.indiState = lac_log
-    if CS.vEgo =< 5:
+    if CS.vEgo <= 5:
       controlsState.lateralControlState.lqrState = lac_log
     elif CS.vEgo > 5:
       controlsState.lateralControlState.pidState = lac_log
