@@ -110,14 +110,14 @@ class PathPlanner():
     #if saturated_steering:
     if mode_select == 3:
       self.mpc_frame += 1
-      if self.mpc_frame % 20 == 0:
+      if self.mpc_frame % 10 == 0:
         self.new_steerRatio += 0.1
         if self.new_steerRatio >= live_steerratio:
           self.new_steerRatio = live_steerratio
         self.mpc_frame = 0
     else:
       self.mpc_frame += 1
-      if self.mpc_frame % 50 == 0:
+      if self.mpc_frame % 10 == 0:
         self.new_steerRatio -= 0.1
         if self.new_steerRatio <= CP.steerRatio:
           self.new_steerRatio = CP.steerRatio
