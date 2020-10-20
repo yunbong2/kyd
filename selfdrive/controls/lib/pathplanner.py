@@ -97,7 +97,6 @@ class PathPlanner():
     angle_steers = sm['carState'].steeringAngle
     active = sm['controlsState'].active
 
-    velocity_curvature = sm['controlsState'].vCurvature
     saturated_steering = sm['controlsState'].steerSaturated
     live_steerratio = sm['liveParameters'].steerRatio
     mode_select = sm['carState'].cruiseState.modeSel

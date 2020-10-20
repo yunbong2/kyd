@@ -1,6 +1,6 @@
 from common.numpy_fast import interp
 import numpy as np
-from cereal import log
+from cereal import car, log
 
 CAMERA_OFFSET = 0.06  # m from center car to camera
 
@@ -84,7 +84,8 @@ class LanePlanner():
       self.l_lane_change_prob = md.meta.desireState[log.PathPlan.Desire.laneChangeLeft - 1]
       self.r_lane_change_prob = md.meta.desireState[log.PathPlan.Desire.laneChangeRight - 1]
 
-  def update_d_poly(self, v_ego):
+  def update_d_poly(self, v_ego, sm):
+    velocity_curvature = sm['controlsState'].vCurvature
     # only offset left and right lane lines; offsetting p_poly does not make sense
     self.l_poly[3] += CAMERA_OFFSET
     self.r_poly[3] += CAMERA_OFFSET
@@ -99,6 +100,6 @@ class LanePlanner():
 
     self.d_poly = calc_d_poly(self.l_poly, self.r_poly, self.p_poly, self.l_prob, self.r_prob, self.lane_width, v_ego)
 
-  def update(self, v_ego, md):
+  def update(self, v_ego, md, sm):
     self.parse_model(md)
-    self.update_d_poly(v_ego)
+    self.update_d_poly(v_ego, sm)
