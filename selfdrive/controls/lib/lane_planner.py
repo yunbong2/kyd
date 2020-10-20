@@ -3,6 +3,7 @@ import numpy as np
 from cereal import car, log
 
 CAMERA_OFFSET = 0.06  # m from center car to camera
+CAMERA_OFFSET_A = 0.04
 
 
 def compute_path_pinv(l=50):
@@ -85,33 +86,28 @@ class LanePlanner():
       self.r_lane_change_prob = md.meta.desireState[log.PathPlan.Desire.laneChangeRight - 1]
 
   def update_d_poly(self, v_ego, sm):
-    global CAMERA_OFFSET
     curvature = sm['controlsState'].curvature
     mode_select = sm['carState'].cruiseState.modeSel
 
     if mode_select == 3:
       Curv = round(curvature, 3)
-      print('curv={}'.format(Curv))
-      #if curvature > 0.001: # left curve
-      #  if Curv > 5:
-      #    Curv = 5
-      #  lean_offset = -0.03 - (vCurv * 10) #move the car to right at left curve
+      if curvature > 0.001: # left curve
+        if Curv > 0.005:
+          Curv = 0.005
+        lean_offset = -0.02 - (Curv * 10) #move the car to right at left curve
       #elif vCurvature < -0.5:   # right curve
       #  if vCurv < -4:
       #    vCurv = -4      
       #  self.lean_offset = -0.02 + (vCurv * 0.02)
-      #else:
-      lean_offset = -0.03
+      else:
+        lean_offset = 0
 
     # only offset left and right lane lines; offsetting p_poly does not make sense
-      CAMERA_OFFSET = CAMERA_OFFSET + lean_offset
-      self.l_poly[3] += CAMERA_OFFSET
-      self.r_poly[3] += CAMERA_OFFSET
+      self.l_poly[3] += CAMERA_OFFSET_A + lean_offset
+      self.r_poly[3] += CAMERA_OFFSET_A + lean_offset
     else:
       self.l_poly[3] += CAMERA_OFFSET
       self.r_poly[3] += CAMERA_OFFSET
-
-    print('CAMERA_OFFSET = {}'.format(CAMERA_OFFSET))
 
     # Find current lanewidth
     self.lane_width_certainty += 0.05 * (self.l_prob * self.r_prob - self.lane_width_certainty)

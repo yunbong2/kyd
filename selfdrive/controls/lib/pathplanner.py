@@ -106,8 +106,7 @@ class PathPlanner():
     # Run MPC
     self.angle_steers_des_prev = self.angle_steers_des_mpc
 
-    #if saturated_steering:
-    if mode_select == 3:
+    if saturated_steering:
       self.mpc_frame += 1
       if self.mpc_frame % 10 == 0:
         self.new_steerRatio += 0.1

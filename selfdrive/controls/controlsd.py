@@ -10,7 +10,7 @@ import cereal.messaging as messaging
 from selfdrive.config import Conversions as CV
 from selfdrive.boardd.boardd import can_list_to_can_capnp
 from selfdrive.car.car_helpers import get_car, get_startup_event, get_one_can
-from selfdrive.controls.lib.lane_planner import CAMERA_OFFSET
+from selfdrive.controls.lib.lane_planner import CAMERA_OFFSET, CAMERA_OFFSET_A
 from selfdrive.controls.lib.drive_helpers import update_v_cruise, initialize_v_cruise
 from selfdrive.controls.lib.longcontrol import LongControl, STARTING_TARGET_SPEED
 from selfdrive.controls.lib.latcontrol_pid import LatControlPID
@@ -396,10 +396,8 @@ class Controls:
     if angle_control_saturated and not CS.steeringPressed and self.active:
       self.saturated_count += 1 # 100 max
       self.steer_saturated = True
-      print("saturated = 1")
     elif lac_log.saturated and not CS.steeringPressed:
       self.steer_saturated = True
-      print("saturated = 2")
     else:
       self.saturated_count = 0
       self.steer_saturated = False
@@ -455,10 +453,12 @@ class Controls:
     if len(meta.desirePrediction) and ldw_allowed:
       l_lane_change_prob = meta.desirePrediction[Desire.laneChangeLeft - 1]
       r_lane_change_prob = meta.desirePrediction[Desire.laneChangeRight - 1]
-      print('C_CAMERA_OFFSET={}'.format(CAMERA_OFFSET))
-      l_lane_close = left_lane_visible and (self.sm['pathPlan'].lPoly[3] < (1.08 - CAMERA_OFFSET))
-      r_lane_close = right_lane_visible and (self.sm['pathPlan'].rPoly[3] > -(1.08 + CAMERA_OFFSET))
-
+      if CS.cruiseState.modeSel == 3:
+        l_lane_close = left_lane_visible and (self.sm['pathPlan'].lPoly[3] < (1.08 - CAMERA_OFFSET_A))
+        r_lane_close = right_lane_visible and (self.sm['pathPlan'].rPoly[3] > -(1.08 + CAMERA_OFFSET_A))
+      else:
+        l_lane_close = left_lane_visible and (self.sm['pathPlan'].lPoly[3] < (1.08 - CAMERA_OFFSET))
+        r_lane_close = right_lane_visible and (self.sm['pathPlan'].rPoly[3] > -(1.08 + CAMERA_OFFSET))
       CC.hudControl.leftLaneDepart = bool(l_lane_change_prob > LANE_DEPARTURE_THRESHOLD and l_lane_close)
       CC.hudControl.rightLaneDepart = bool(r_lane_change_prob > LANE_DEPARTURE_THRESHOLD and r_lane_close)
 
