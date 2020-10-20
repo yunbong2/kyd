@@ -105,12 +105,12 @@ class Controls:
     self.LoC = LongControl(self.CP, self.CI.compute_gb)
     self.VM = VehicleModel(self.CP)
 
-    #if self.CP.lateralTuning.which() == 'pid':
-    #  self.LaC = LatControlPID(self.CP)
-    #elif self.CP.lateralTuning.which() == 'indi':
-    #  self.LaC = LatControlINDI(self.CP)
-    #elif self.CP.lateralTuning.which() == 'lqr':
-    #  self.LaC = LatControlLQR(self.CP)
+    if self.CP.lateralTuning.which() == 'pid':
+      self.LaC = LatControlPID(self.CP)
+    elif self.CP.lateralTuning.which() == 'indi':
+      self.LaC = LatControlINDI(self.CP)
+    elif self.CP.lateralTuning.which() == 'lqr':
+      self.LaC = LatControlLQR(self.CP)
 
     self.controlsAllowed = False
 
@@ -249,12 +249,6 @@ class Controls:
     #if CS.brakePressed and self.sm['plan'].vTargetFuture >= STARTING_TARGET_SPEED \
     #  and self.CP.openpilotLongitudinalControl and CS.vEgo < 0.3:
     #  self.events.add(EventName.noTarget)
-
-    if CS.vEgo <= 5:
-      self.LaC = LatControlLQR(self.CP)
-    elif CS.vEgo > 5:
-      self.LaC = LatControlPID(self.CP)
-
 
     self.auto_enable( CS )
 
@@ -535,16 +529,12 @@ class Controls:
     controlsState.alertTextMsg1 = self.log_alertTextMsg1
     controlsState.alertTextMsg2 = self.log_alertTextMsg2
 
-    #if self.CP.lateralTuning.which() == 'pid':
-    #  controlsState.lateralControlState.pidState = lac_log
-    #elif self.CP.lateralTuning.which() == 'lqr':
-    #  controlsState.lateralControlState.lqrState = lac_log
-    #elif self.CP.lateralTuning.which() == 'indi':
-    #  controlsState.lateralControlState.indiState = lac_log
-    if CS.vEgo <= 5:
-      controlsState.lateralControlState.lqrState = lac_log
-    elif CS.vEgo > 5:
+    if self.CP.lateralTuning.which() == 'pid':
       controlsState.lateralControlState.pidState = lac_log
+    elif self.CP.lateralTuning.which() == 'lqr':
+      controlsState.lateralControlState.lqrState = lac_log
+    elif self.CP.lateralTuning.which() == 'indi':
+      controlsState.lateralControlState.indiState = lac_log
     self.pm.send('controlsState', dat)
 
     # carState
