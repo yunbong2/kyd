@@ -103,14 +103,15 @@ class LanePlanner():
       lean_offset = -0.03
 
     # only offset left and right lane lines; offsetting p_poly does not make sense
-      CAMERA_OFFSET = CAMERA_OFFSET + lean_offset
-      self.l_poly[3] += CAMERA_OFFSET
-      self.r_poly[3] += CAMERA_OFFSET
+      CAMERA_OFFSET_A = CAMERA_OFFSET + lean_offset
+      self.l_poly[3] += CAMERA_OFFSET_A
+      self.r_poly[3] += CAMERA_OFFSET_A
     else:
-      self.l_poly[3] += CAMERA_OFFSET
-      self.r_poly[3] += CAMERA_OFFSET
+      CAMERA_OFFSET_A = CAMERA_OFFSET
+      self.l_poly[3] += CAMERA_OFFSET_A
+      self.r_poly[3] += CAMERA_OFFSET_A
 
-    print('CAMERA_OFFSET = {}'.format(CAMERA_OFFSET))
+    print('CAMERA_OFFSET = {}'.format(CAMERA_OFFSET_A))
 
     # Find current lanewidth
     self.lane_width_certainty += 0.05 * (self.l_prob * self.r_prob - self.lane_width_certainty)
