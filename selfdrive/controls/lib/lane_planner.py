@@ -86,9 +86,27 @@ class LanePlanner():
 
   def update_d_poly(self, v_ego, sm):
     velocity_curvature = sm['controlsState'].vCurvature
+    mode_select = sm['carState'].cruiseState.modeSel
+
+    if mode_select == 3:
+      vCurv = velocity_curvature
+      if velocity_curvature > 0.5: # left curve
+        if vCurv > 5:
+          vCurv = 5
+        lean_offset = -0.03 - (vCurv * 0.02) #move the car to right at left curve
+      #elif vCurvature < -0.5:   # right curve
+      #  if vCurv < -4:
+      #    vCurv = -4      
+      #  self.lean_offset = -0.02 + (vCurv * 0.02)
+      else:
+        lean_offset = -0.03
+
     # only offset left and right lane lines; offsetting p_poly does not make sense
-    self.l_poly[3] += CAMERA_OFFSET
-    self.r_poly[3] += CAMERA_OFFSET
+      self.l_poly[3] += CAMERA_OFFSET + lean_offset
+      self.r_poly[3] += CAMERA_OFFSET + lean_offset
+    else:
+      self.l_poly[3] += CAMERA_OFFSET
+      self.r_poly[3] += CAMERA_OFFSET
 
     # Find current lanewidth
     self.lane_width_certainty += 0.05 * (self.l_prob * self.r_prob - self.lane_width_certainty)
