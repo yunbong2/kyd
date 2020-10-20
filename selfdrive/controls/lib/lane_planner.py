@@ -85,6 +85,7 @@ class LanePlanner():
       self.r_lane_change_prob = md.meta.desireState[log.PathPlan.Desire.laneChangeRight - 1]
 
   def update_d_poly(self, v_ego, sm):
+    global CAMERA_OFFSET
     curvature = sm['controlsState'].curvature
     mode_select = sm['carState'].cruiseState.modeSel
 
@@ -103,15 +104,14 @@ class LanePlanner():
       lean_offset = -0.03
 
     # only offset left and right lane lines; offsetting p_poly does not make sense
-      CAMERA_OFFSET_A = CAMERA_OFFSET + lean_offset
-      self.l_poly[3] += CAMERA_OFFSET_A
-      self.r_poly[3] += CAMERA_OFFSET_A
+      CAMERA_OFFSET = CAMERA_OFFSET + lean_offset
+      self.l_poly[3] += CAMERA_OFFSET
+      self.r_poly[3] += CAMERA_OFFSET
     else:
-      CAMERA_OFFSET_A = CAMERA_OFFSET
-      self.l_poly[3] += CAMERA_OFFSET_A
-      self.r_poly[3] += CAMERA_OFFSET_A
+      self.l_poly[3] += CAMERA_OFFSET
+      self.r_poly[3] += CAMERA_OFFSET
 
-    print('CAMERA_OFFSET = {}'.format(CAMERA_OFFSET_A))
+    print('CAMERA_OFFSET = {}'.format(CAMERA_OFFSET))
 
     # Find current lanewidth
     self.lane_width_certainty += 0.05 * (self.l_prob * self.r_prob - self.lane_width_certainty)
