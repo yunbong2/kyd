@@ -99,8 +99,8 @@ class LanePlanner():
       #  if vCurv < -4:
       #    vCurv = -4      
       #  self.lean_offset = -0.02 + (vCurv * 0.02)
-      else:
-        lean_offset = -0.03
+      #else:
+      lean_offset = -0.03
 
     # only offset left and right lane lines; offsetting p_poly does not make sense
       self.l_poly[3] += CAMERA_OFFSET + lean_offset
