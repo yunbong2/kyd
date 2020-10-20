@@ -90,6 +90,7 @@ class LanePlanner():
 
     if mode_select == 3:
       vCurv = velocity_curvature
+      print('curv={}'.format(vCurv))
       if velocity_curvature > 0.5: # left curve
         if vCurv > 5:
           vCurv = 5
