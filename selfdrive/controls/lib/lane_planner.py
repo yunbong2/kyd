@@ -85,16 +85,16 @@ class LanePlanner():
       self.r_lane_change_prob = md.meta.desireState[log.PathPlan.Desire.laneChangeRight - 1]
 
   def update_d_poly(self, v_ego, sm):
-    velocity_curvature = sm['controlsState'].vCurvature
+    curvature = sm['controlsState'].curvature
     mode_select = sm['carState'].cruiseState.modeSel
 
     if mode_select == 3:
-      vCurv = velocity_curvature
-      print('curv={}'.format(vCurv))
-      if velocity_curvature > 0.5: # left curve
-        if vCurv > 5:
-          vCurv = 5
-        lean_offset = -0.03 - (vCurv * 0.02) #move the car to right at left curve
+      Curv = curvature
+      print('curv={}  l_poly={}  r_poly={}'.format(Curv, self.l_poly[3], self.r_poly[3]))
+      #if curvature > 0.5: # left curve
+      #  if Curv > 5:
+      #    Curv = 5
+      #  lean_offset = -0.03 - (vCurv * 0.02) #move the car to right at left curve
       #elif vCurvature < -0.5:   # right curve
       #  if vCurv < -4:
       #    vCurv = -4      
