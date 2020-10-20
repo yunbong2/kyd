@@ -89,12 +89,12 @@ class LanePlanner():
     mode_select = sm['carState'].cruiseState.modeSel
 
     if mode_select == 3:
-      Curv = curvature
-      print('curv={}  l_poly={}  r_poly={}'.format(Curv, self.l_poly[3], self.r_poly[3]))
-      #if curvature > 0.5: # left curve
+      Curv = round(curvature, 3)
+      print('curv={}'.format(Curv))
+      #if curvature > 0.001: # left curve
       #  if Curv > 5:
       #    Curv = 5
-      #  lean_offset = -0.03 - (vCurv * 0.02) #move the car to right at left curve
+      #  lean_offset = -0.03 - (vCurv * 10) #move the car to right at left curve
       #elif vCurvature < -0.5:   # right curve
       #  if vCurv < -4:
       #    vCurv = -4      
@@ -103,11 +103,14 @@ class LanePlanner():
       lean_offset = -0.03
 
     # only offset left and right lane lines; offsetting p_poly does not make sense
-      self.l_poly[3] += CAMERA_OFFSET + lean_offset
-      self.r_poly[3] += CAMERA_OFFSET + lean_offset
+      CAMERA_OFFSET = CAMERA_OFFSET + lean_offset
+      self.l_poly[3] += CAMERA_OFFSET
+      self.r_poly[3] += CAMERA_OFFSET
     else:
       self.l_poly[3] += CAMERA_OFFSET
       self.r_poly[3] += CAMERA_OFFSET
+
+    print('CAMERA_OFFSET = {}'.format(CAMERA_OFFSET))
 
     # Find current lanewidth
     self.lane_width_certainty += 0.05 * (self.l_prob * self.r_prob - self.lane_width_certainty)

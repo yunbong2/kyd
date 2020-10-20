@@ -396,8 +396,10 @@ class Controls:
     if angle_control_saturated and not CS.steeringPressed and self.active:
       self.saturated_count += 1 # 100 max
       self.steer_saturated = True
+      print("saturated = 1")
     elif lac_log.saturated and not CS.steeringPressed:
       self.steer_saturated = True
+      print("saturated = 2")
     else:
       self.saturated_count = 0
       self.steer_saturated = False
