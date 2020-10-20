@@ -46,17 +46,13 @@ class CarInterface(CarInterfaceBase):
       ret.steerRatio = 13.5
       tire_stiffness_factor = 0.5
       
-      #ret.lateralTuning.pid.kf = 0.00005
-      #ret.lateralTuning.pid.kiBP, ret.lateralTuning.pid.kpBP = [[0.], [0.]]
-      #ret.lateralTuning.pid.kpV, ret.lateralTuning.pid.kiV = [[0.20], [0.04]]
-      #ret.lateralTuning.pid.kpBP = [0., 9., 17., 28.]   #0, 32.4m/s, 61.2m/s 100.8m/s
-      #ret.lateralTuning.pid.kpV = [0.16, 0.18, 0.20, 0.22]
-      #ret.lateralTuning.pid.kiBP = [0., 9., 17., 28.]
-      #ret.lateralTuning.pid.kiV = [0.03, 0.035, 0.04, 0.045]
-      #ret.lateralTuning.pid.kfBP = [0., 9., 17., 28.]
-      #ret.lateralTuning.pid.kfV = [0.00003, 0.00004, 0.00005, 0.00006]
+      ret.lateralTuning.pid.kf = 0.00005
+      ret.lateralTuning.pid.kpBP = [0., 9., 17., 28.]   #0, 32.4m/s, 61.2m/s 100.8m/s
+      ret.lateralTuning.pid.kpV = [0.16, 0.18, 0.20, 0.22]
+      ret.lateralTuning.pid.kiBP = [0., 9., 17., 28.]
+      ret.lateralTuning.pid.kiV = [0.03, 0.035, 0.04, 0.045]
 
-      ret.lateralTuning.init('lqr')
+      #ret.lateralTuning.init('lqr')
       ret.lateralTuning.lqr.scale = 1500.0
       ret.lateralTuning.lqr.ki = 0.01
       ret.lateralTuning.lqr.a = [0., 1., -0.22619643, 1.21822268]
@@ -72,10 +68,10 @@ class CarInterface(CarInterfaceBase):
 
 
       #ret.lateralTuning.init('indi')
-      #ret.lateralTuning.indi.innerLoopGain = 3.0
-      #ret.lateralTuning.indi.outerLoopGain = 2.0
-      #ret.lateralTuning.indi.timeConstant = 1.0
-      #ret.lateralTuning.indi.actuatorEffectiveness = 1.0
+      ret.lateralTuning.indi.innerLoopGain = 3.0
+      ret.lateralTuning.indi.outerLoopGain = 2.0
+      ret.lateralTuning.indi.timeConstant = 1.0
+      ret.lateralTuning.indi.actuatorEffectiveness = 1.5
 
 
     ret.centerToFront = ret.wheelbase * 0.4
