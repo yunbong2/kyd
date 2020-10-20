@@ -3,7 +3,7 @@ import numpy as np
 from cereal import car, log
 
 CAMERA_OFFSET = 0.06  # m from center car to camera
-CAMERA_OFFSET_A = 0.03
+CAMERA_OFFSET_A = 0.02
 
 
 def compute_path_pinv(l=50):
@@ -92,13 +92,13 @@ class LanePlanner():
     if mode_select == 3:
       Curv = round(curvature, 3)
       if curvature > 0.001: # left curve
-        if Curv > 0.005:
-          Curv = 0.005
-        lean_offset = -0.03 - (Curv * 10) #move the car to right at left curve
+        if Curv > 0.006:
+          Curv = 0.006
+        lean_offset = -0.04 - (Curv * 10) #move the car to right at left curve
       elif curvature < -0.001:   # right curve
-        if Curv < -0.005:
-          Curv = -0.005
-        lean_offset = -0.01 + (Curv * 10) #move the car to right at right curve
+        if Curv < -0.006:
+          Curv = -0.006
+        lean_offset = -0.02 + (Curv * 10) #move the car to right at right curve
       else:
         lean_offset = 0
 
