@@ -101,6 +101,8 @@ class LanePlanner():
         lean_offset = -0.02 + (Curv * 10) #move the car to right at right curve
       else:
         lean_offset = 0
+    else:
+      lean_offset = 0
 
     # only offset left and right lane lines; offsetting p_poly does not make sense
       self.l_poly[3] += CAMERA_OFFSET_A + lean_offset
