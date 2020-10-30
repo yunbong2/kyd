@@ -40,11 +40,11 @@ class CarInterface(CarInterfaceBase):
     ret.steerActuatorDelay = 0.25
 
 
-    if candidate == CAR.OPTIMA_HEV:
+    if candidate == CAR.SONATA_LF_TURBO:
       ret.wheelbase = 2.80
       ret.mass = 1595. + STD_CARGO_KG
-      ret.steerRatio = 13.5
-      tire_stiffness_factor = 0.5
+      ret.steerRatio = 15.3
+      tire_stiffness_factor = 0.6
       
       #ret.lateralTuning.pid.kf = 0.00005
       #ret.lateralTuning.pid.kpBP = [0., 9., 17., 28.]   #0, 32.4m/s, 61.2m/s 100.8m/s
@@ -53,15 +53,15 @@ class CarInterface(CarInterfaceBase):
       #ret.lateralTuning.pid.kiV = [0.03, 0.035, 0.04, 0.045]
 
       ret.lateralTuning.init('lqr')
-      ret.lateralTuning.lqr.scale = 1500.0
+      ret.lateralTuning.lqr.scale = 1850.0
       ret.lateralTuning.lqr.ki = 0.01
       ret.lateralTuning.lqr.a = [0., 1., -0.22619643, 1.21822268]
       ret.lateralTuning.lqr.b = [-1.92006585e-04, 3.95603032e-05]
       ret.lateralTuning.lqr.c = [1., 0.]
       ret.lateralTuning.lqr.k = [-110., 451.]
       ret.lateralTuning.lqr.l = [0.33, 0.318]
-      ret.lateralTuning.lqr.dcGain = 0.0027
-      ret.steerLimitTimer = 0.4
+      ret.lateralTuning.lqr.dcGain = 0.00225
+      ret.steerLimitTimer = 3,0
       ret.steerRateCost = 0.55
       ret.steerMaxBP = [0.]
       ret.steerMaxV = [1.5]
